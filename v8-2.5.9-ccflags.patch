@@ -1,0 +1,56 @@
+From 9342a28b524c1679d6d664ed09b8db326ddbeb3e Mon Sep 17 00:00:00 2001
+From: Lubomir Rintel <lkundrak@v3.sk>
+Date: Sat, 4 Dec 2010 13:58:10 +0100
+Subject: [PATCH] Let environment variables override what would scons construct
+
+So that we can have control over CCFLAGS we use.
+---
+ SConstruct |   19 +++++++++++++++++--
+ 1 files changed, 17 insertions(+), 2 deletions(-)
+
+diff --git a/SConstruct b/SConstruct
+index 820c1a1..2793a49 100644
+--- a/SConstruct
++++ b/SConstruct
+@@ -891,6 +891,13 @@ class BuildContext(object):
+     self.build_snapshot = (options['snapshot'] == 'on')
+     self.flags = None
+ 
++  def OverrideFlags(self, initial, overrides):
++    result = initial.copy()
++    for key in initial.keys():
++      if overrides.has_key(key):
++        result[key] = overrides[key];
++    return result
++
+   def AddRelevantFlags(self, initial, flags):
+     result = initial.copy()
+     toolchain = self.options['toolchain']
+@@ -1003,14 +1010,22 @@ def BuildSpecific(env, mode, env_overrides):
+   except KeyError:
+     pass
+ 
+-  library_flags = context.AddRelevantFlags(user_environ, LIBRARY_FLAGS)
++  library_flags = context.AddRelevantFlags({}, LIBRARY_FLAGS)
+   v8_flags = context.AddRelevantFlags(library_flags, V8_EXTRA_FLAGS)
+   mksnapshot_flags = context.AddRelevantFlags(library_flags, MKSNAPSHOT_EXTRA_FLAGS)
+   dtoa_flags = context.AddRelevantFlags(library_flags, DTOA_EXTRA_FLAGS)
+   cctest_flags = context.AddRelevantFlags(v8_flags, CCTEST_EXTRA_FLAGS)
+-  sample_flags = context.AddRelevantFlags(user_environ, SAMPLE_FLAGS)
++  sample_flags = context.AddRelevantFlags({}, SAMPLE_FLAGS)
+   d8_flags = context.AddRelevantFlags(library_flags, D8_FLAGS)
+ 
++  library_flags = context.OverrideFlags(library_flags, user_environ)
++  v8_flags = context.OverrideFlags(v8_flags, user_environ)
++  mksnapshot_flags = context.OverrideFlags(mksnapshot_flags, user_environ)
++  dtoa_flags = context.OverrideFlags(dtoa_flags, user_environ)
++  cctest_flags = context.OverrideFlags(cctest_flags, user_environ)
++  sample_flags = context.OverrideFlags(sample_flags, user_environ)
++  d8_flags = context.OverrideFlags(d8_flags, user_environ)
++
+   context.flags = {
+     'v8': v8_flags,
+     'mksnapshot': mksnapshot_flags,
+-- 
+1.7.3.2
+
