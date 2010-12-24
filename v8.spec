@@ -17,7 +17,7 @@ Source1:        v8-js2c
 Patch0:         v8-2.5.9-ccflags.patch
 Patch1:         v8-2.5.9-shebangs.patch
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-ExclusiveArch:  %{ix86} x86_64 arm
+ExclusiveArch:  %{ix86} x86_64 %{arm}
 BuildRequires:  scons, readline-devel
 
 %description
