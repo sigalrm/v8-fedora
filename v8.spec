@@ -2,7 +2,7 @@
 
 Name:           v8
 Version:        3.0.0.1
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        JavaScript Engine
 Group:          System Environment/Libraries
 License:        BSD
@@ -16,6 +16,7 @@ Source0:        %{name}-%{version}.tar.gz
 Source1:        v8-js2c
 Patch0:         v8-2.5.9-ccflags.patch
 Patch1:         v8-2.5.9-shebangs.patch
+Patch2:         v8-3.0.0.1-export.patch
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 ExclusiveArch:  %{ix86} x86_64 %{arm}
 BuildRequires:  scons, readline-devel
@@ -39,11 +40,12 @@ Development headers, libraries and tools for v8.
 %setup -q
 %patch0 -p1 -b .ccflags
 %patch1 -p1 -b .shebangs
+%patch2 -p1 -b .export
 find \( -name '*.cc' -o -name '*.h' \) -print0 |xargs -0 chmod -x
 
 
 %build
-# Certains options enabled by -O2 causes binaries to crash immediately, for reasons yet unknown,
+# Certain options enabled by -O2 causes binaries to crash immediately, for reasons yet unknown,
 CCFLAGS="%{optflags} -fno-reorder-blocks -fno-strict-aliasing" \
         scons %{_smp_mflags} env='CCFLAGS: -fPIC' \
         library d8 cctests sample \
@@ -98,12 +100,15 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Tue Dec 28 2010 Lubomir Rintel <lkundrak@v3.sk> - 3.0.0.1-3
+- Export some more symbols for node.js
+
 * Mon Dec 13 2010 Lubomir Rintel <lkundrak@v3.sk> - 3.0.0.1-2
 - Remove files with broken licenses
 - Fix mode of files in -debuginfo (this time for real)
 
 * Sat Dec 11 2010 Lubomir Rintel <lkundrak@v3.sk> - 3.0.0.1-1
-- Fix mode of a header file in -debuginfo
+- Fix mode of a header file in -debuginfo 
 - Newer version
 
 * Fri Dec 10 2010 Lubomir Rintel <lkundrak@v3.sk> - 2.5.9-2
