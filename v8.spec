@@ -2,7 +2,7 @@
 
 Name:           v8
 Version:        3.0.0.1
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        JavaScript Engine
 Group:          System Environment/Libraries
 License:        BSD
@@ -100,6 +100,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Mon Feb 07 2011 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 3.0.0.1-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_15_Mass_Rebuild
+
 * Tue Dec 28 2010 Lubomir Rintel <lkundrak@v3.sk> - 3.0.0.1-3
 - Export some more symbols for node.js
 
