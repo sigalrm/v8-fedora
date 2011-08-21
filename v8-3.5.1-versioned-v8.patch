@@ -1,0 +1,14 @@
+Index: v8-3.5.1/SConstruct
+===================================================================
+--- v8-3.5.1.orig/SConstruct
++++ v8-3.5.1/SConstruct
+@@ -1350,6 +1350,9 @@ def BuildSpecific(env, mode, env_overrid
+     # When building shared object with SONAME version the library name.
+     library_name += '-' + version
+
++  # Fedora patch: link d8 against versioned v8
++  d8_flags['LIBS'][d8_flags['LIBS'].index('v8')] += '-' + version
++  print "BuildSpecific: d8_flags = %s" % d8_flags
+   # Generate library SONAME if required by the build.
+   if context.options['soname'] == 'on':
+     soname = GetSpecificSONAME()
