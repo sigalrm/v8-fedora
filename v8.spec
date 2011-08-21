@@ -1,22 +1,23 @@
 %{!?python_sitelib: %global python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")}
 
 Name:           v8
-Version:        3.0.0.1
-Release:        4%{?dist}
+Version:        3.5.1
+Release:        1%{?dist}
 Summary:        JavaScript Engine
 Group:          System Environment/Libraries
 License:        BSD
 URL:            http://code.google.com/p/v8
-# svn export http://v8.googlecode.com/svn/tags/3.0.0.1/ v8-3.0.0.1
+# git clone git://github.com/%{name}/%{name}.git
+# git archive --prefix=%{name}-%{version}/ %{version} \
+#     >%{name}-%{version}.tar.bz2
 # #Missing licenses:
 # rm v8-3.0.0.1/benchmarks/earley-boyer.js
 # rm v8-3.0.0.1/benchmarks/raytrace.js
 # tar czf v8-3.0.0.1.tar.gz v8-3.0.0.1
-Source0:        %{name}-%{version}.tar.gz
+Source0:        %{name}-%{version}.tar.bz2
 Source1:        v8-js2c
 Patch0:         v8-2.5.9-ccflags.patch
 Patch1:         v8-2.5.9-shebangs.patch
-Patch2:         v8-3.0.0.1-export.patch
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 ExclusiveArch:  %{ix86} x86_64 %{arm}
 BuildRequires:  scons, readline-devel
@@ -40,7 +41,6 @@ Development headers, libraries and tools for v8.
 %setup -q
 %patch0 -p1 -b .ccflags
 %patch1 -p1 -b .shebangs
-%patch2 -p1 -b .export
 find \( -name '*.cc' -o -name '*.h' \) -print0 |xargs -0 chmod -x
 
 
