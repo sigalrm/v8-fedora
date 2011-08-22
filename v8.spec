@@ -101,6 +101,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/d8
 %{_bindir}/js2c
 %{_libdir}/libv8-%{version}.so
+%{_libdir}/libv8.so.%{major_version}
 
 
 %files devel
