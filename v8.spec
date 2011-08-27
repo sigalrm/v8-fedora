@@ -15,28 +15,28 @@
 %{!?python_sitelib: %global python_sitelib %(%{__python} \
     -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")}
 
-Name:		v8
-Version:	%{somajor}.%{sominor}.%{sobuild}
-Release:	4%{?dist}
-Summary:	JavaScript Engine
-Group:		System Environment/Libraries
-License:	BSD
-URL:		http://code.google.com/p/v8
+Name:       v8
+Version:    %{somajor}.%{sominor}.%{sobuild}
+Release:    4%{?dist}
+Summary:    JavaScript Engine
+Group:      System Environment/Libraries
+License:    BSD
+URL:        http://code.google.com/p/v8
 # No tarballs, pulled from svn
 # Checkout script is Source1
-Source0:	v8-%{version}.tar.bz2
-Source1:	v8-daily-tarball.sh
+Source0:    v8-%{version}.tar.bz2
+Source1:    v8-daily-tarball.sh
 # Enable experimental i18n extension that chromium needs
-Patch0:		v8-3.3.10-enable-experimental.patch
+Patch0:     v8-3.3.10-enable-experimental.patch
 # Disable comparison check that gcc 4.5 thinks is always false
-Patch1:		v8-3.2.10-always-false.patch
+Patch1:     v8-3.2.10-always-false.patch
 # Fix language-matcher.cc compile
-Patch2:		v8-3.3.10-language-matcher-fix.patch
+Patch2:     v8-3.3.10-language-matcher-fix.patch
 # Remove unnecessary shebangs
-Patch3:  v8-2.5.9-shebangs.patch
-BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-ExclusiveArch:	%{ix86} x86_64 arm
-BuildRequires:	scons, readline-devel, libicu-devel
+Patch3:     v8-2.5.9-shebangs.patch
+BuildRoot:  %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+ExclusiveArch:    %{ix86} x86_64 arm
+BuildRequires:    scons, readline-devel, libicu-devel
 
 %description
 V8 is Google's open source JavaScript engine. V8 is written in C++ and is used 
@@ -44,9 +44,9 @@ in Google Chrome, the open source browser from Google. V8 implements ECMAScript
 as specified in ECMA-262, 3rd edition.
 
 %package devel
-Group:		Development/Libraries
-Summary:	Development headers and libraries for v8
-Requires:	%{name} = %{version}-%{release}
+Group:      Development/Libraries
+Summary:    Development headers and libraries for v8
+Requires:   %{name} = %{version}-%{release}
 
 %description devel
 Development headers and libraries for v8.
