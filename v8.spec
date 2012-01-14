@@ -17,7 +17,7 @@
 
 Name:       v8
 Version:    %{somajor}.%{sominor}.%{sobuild}
-Release:    4%{?dist}
+Release:    5%{?dist}
 Summary:    JavaScript Engine
 Group:      System Environment/Libraries
 License:    BSD
@@ -182,6 +182,9 @@ rm -rf %{buildroot}
 %{python_sitelib}/j*.py*
 
 %changelog
+* Sat Jan 14 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 3.3.10-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_17_Mass_Rebuild
+
 * Sat Aug 27 2011 Matěj Cepl <mcepl@redhat.com> - 3.3.10-4
 - Make jsmin.py working.
 
