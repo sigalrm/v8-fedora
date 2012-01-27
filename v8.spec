@@ -9,29 +9,25 @@
 # For the 1.2 branch, we use 0s here
 # For 1.3+, we use the three digit versions
 %global somajor 3
-%global sominor 3
-%global sobuild 10
+%global sominor 8
+%global sobuild 9
 %global sover %{somajor}.%{sominor}.%{sobuild}
 %{!?python_sitelib: %global python_sitelib %(%{__python} \
     -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")}
 
 Name:       v8
 Version:    %{somajor}.%{sominor}.%{sobuild}
-Release:    5%{?dist}
+Release:    1.20120127svn10526%{?dist}
 Summary:    JavaScript Engine
 Group:      System Environment/Libraries
 License:    BSD
 URL:        http://code.google.com/p/v8
 # No tarballs, pulled from svn
 # Checkout script is Source1
-Source0:    v8-%{version}.tar.bz2
+Source0:    v8-%{version}-20120127svn10526.tar.bz2
 Source1:    v8-daily-tarball.sh
 # Enable experimental i18n extension that chromium needs
 Patch0:     v8-3.3.10-enable-experimental.patch
-# Disable comparison check that gcc 4.5 thinks is always false
-Patch1:     v8-3.2.10-always-false.patch
-# Fix language-matcher.cc compile
-Patch2:     v8-3.3.10-language-matcher-fix.patch
 # Remove unnecessary shebangs
 Patch3:     v8-2.5.9-shebangs.patch
 BuildRoot:  %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
@@ -52,11 +48,13 @@ Requires:   %{name} = %{version}-%{release}
 Development headers and libraries for v8.
 
 %prep
-%setup -q -n %{name}-%{version}
-%patch0 -p1 -b .experimental
-%patch1 -p1 -b .always-false
-%patch2 -p1 -b .fix
+%setup -q -n %{name}-%{version}-20120127svn10526
+#patch0 -p1 -b .experimental
 %patch3 -p1 -b .shebang
+
+#sed -i '/break-iterator.cc/d' src/SConscript
+#sed -i '/collator.cc/d' src/SConscript
+sed -i '/extensions\/experimental\//d' src/SConscript
 
 # -fno-strict-aliasing is needed with gcc 4.4 to get past some ugly code
 PARSED_OPT_FLAGS=`echo \'$RPM_OPT_FLAGS -fPIC -fno-strict-aliasing -Wno-unused-parameter -Wno-unused-but-set-variable\'| sed "s/ /',/g" | sed "s/',/', '/g"`
@@ -71,13 +69,15 @@ find . \( -name \*.cc -o -name \*.h -o -name \*.py \) -a -executable \
 
 
 %build
-export GCC_VERSION="44"
-scons library=shared snapshots=on \
+export GCC_VERSION="46"
+export COMPRESSION="off"
+scons library=shared snapshots=on verbose=on \
 %ifarch x86_64
 arch=x64 \
 %endif
 visibility=default \
-env=CCFLAGS:"-fPIC"
+env=CCFLAGS:"-fPIC" \
+%{?_smp_mflags}
 
 %if 0%{?fedora} > 15
 export ICU_LINK_FLAGS=`pkg-config --libs-only-l icu-i18n`
@@ -95,7 +95,6 @@ g++ $RPM_OPT_FLAGS -fPIC -o libv8preparser.so.%{sover} -shared -Wl,-soname,libv8
         obj/release/preparse-data.os \
         obj/release/preparser-api.os \
         obj/release/preparser.os \
-        obj/release/scanner-base.os \
         obj/release/token.os \
         obj/release/unicode.os
 
@@ -103,13 +102,13 @@ g++ $RPM_OPT_FLAGS -fPIC -o libv8preparser.so.%{sover} -shared -Wl,-soname,libv8
 export RELEASE_BUILD_OBJS=`echo obj/release/*.os | sed 's|obj/release/preparser-api.os||g'`
 
 %ifarch arm
-g++ $RPM_OPT_FLAGS -fPIC -o libv8.so.%{sover} -shared -Wl,-soname,libv8.so.%{somajor} $RELEASE_BUILD_OBJS obj/release/extensions/*.os obj/release/extensions/experimental/*.os obj/release/arm/*.os $ICU_LINK_FLAGS
+g++ $RPM_OPT_FLAGS -fPIC -o libv8.so.%{sover} -shared -Wl,-soname,libv8.so.%{somajor} $RELEASE_BUILD_OBJS obj/release/extensions/*.os obj/release/arm/*.os $ICU_LINK_FLAGS
 %endif
 %ifarch %{ix86}
-g++ $RPM_OPT_FLAGS -fPIC -o libv8.so.%{sover} -shared -Wl,-soname,libv8.so.%{somajor} $RELEASE_BUILD_OBJS obj/release/extensions/*.os obj/release/extensions/experimental/*.os obj/release/ia32/*.os $ICU_LINK_FLAGS
+g++ $RPM_OPT_FLAGS -fPIC -o libv8.so.%{sover} -shared -Wl,-soname,libv8.so.%{somajor} $RELEASE_BUILD_OBJS obj/release/extensions/*.os obj/release/ia32/*.os $ICU_LINK_FLAGS
 %endif
 %ifarch x86_64
-g++ $RPM_OPT_FLAGS -fPIC -o libv8.so.%{sover} -shared -Wl,-soname,libv8.so.%{somajor} $RELEASE_BUILD_OBJS obj/release/extensions/*.os obj/release/extensions/experimental/*.os obj/release/x64/*.os $ICU_LINK_FLAGS
+g++ $RPM_OPT_FLAGS -fPIC -o libv8.so.%{sover} -shared -Wl,-soname,libv8.so.%{somajor} $RELEASE_BUILD_OBJS obj/release/extensions/*.os obj/release/x64/*.os $ICU_LINK_FLAGS
 %endif
 
 # We need to do this so d8 can link against it.
@@ -126,7 +125,7 @@ library=shared snapshots=on console=readline visibility=default || :
 # Sigh. I f*****g hate scons.
 rm -rf d8
 
-g++ $RPM_OPT_FLAGS -o d8 obj/release/d8-debug.os obj/release/d8-posix.os obj/release/d8-readline.os obj/release/d8.os obj/release/d8-js.os -lpthread -lreadline -lpthread -L. -lv8 $ICU_LINK_FLAGS
+g++ $RPM_OPT_FLAGS -o d8 obj/release/d8.os -lpthread -lreadline -lpthread -L. -lv8 $ICU_LINK_FLAGS
 
 %install
 rm -rf %{buildroot}
@@ -151,10 +150,8 @@ chmod -x %{buildroot}%{_includedir}/v8*.h
 
 mkdir -p %{buildroot}%{_includedir}/v8/extensions/experimental/
 install -p src/extensions/*.h %{buildroot}%{_includedir}/v8/extensions/
-install -p src/extensions/experimental/*.h %{buildroot}%{_includedir}/v8/extensions/experimental/
 
 chmod -x %{buildroot}%{_includedir}/v8/extensions/*.h
-chmod -x %{buildroot}%{_includedir}/v8/extensions/experimental/*.h
 
 # install Python JS minifier scripts for nodejs
 install -d %{buildroot}%{python_sitelib}
@@ -182,6 +179,11 @@ rm -rf %{buildroot}
 %{python_sitelib}/j*.py*
 
 %changelog
+* Fri Jan 27 2012 Thomas Spura <tomspur@fedoraproject.org> - 3.8.9-1.20120127svn10526
+- update to 3.8.9
+- some patches not applicable anymore
+- experimental i18n extension patch doesn't work anymore
+
 * Sat Jan 14 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 3.3.10-5
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_17_Mass_Rebuild
 
