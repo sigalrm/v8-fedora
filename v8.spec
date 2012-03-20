@@ -1,38 +1,45 @@
 # Hi Googlers! If you're looking in here for patches, nifty.
-# You (and everyone else) are welcome to use any of my Chromium patches under the terms of the GPLv2 or later.
-# You (and everyone else) are welcome to use any of my V8-specific patches under the terms of the BSD license.
-# You (and everyone else) may NOT use my patches under any other terms.
-# I hate to be a party-pooper here, but I really don't want to help Google make a proprietary browser.
-# There are enough of those already.
-# All copyrightable work in these spec files and patches is Copyright 2010 Tom Callaway
+# You (and everyone else) are welcome to use any of my Chromium spec files and
+# patches under the terms of the GPLv2 or later.
+# You (and everyone else) are welcome to use any of my V8-specific spec files
+# and patches under the terms of the BSD license.
+# You (and everyone else) may NOT use my spec files or patches under any other
+# terms.
+# I hate to be a party-pooper here, but I really don't want to help Google
+# make a proprietary browser. There are enough of those already.
+# All copyrightable work in these spec files and patches is Copyright 2011
+# Tom Callaway <spot@fedoraproject.org>
 
 # For the 1.2 branch, we use 0s here
 # For 1.3+, we use the three digit versions
 %global somajor 3
-%global sominor 8
-%global sobuild 9
+%global sominor 7
+%global sobuild 12
 %global sover %{somajor}.%{sominor}.%{sobuild}
-%{!?python_sitelib: %global python_sitelib %(%{__python} \
-    -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")}
 
-Name:       v8
-Version:    %{somajor}.%{sominor}.%{sobuild}
-Release:    1.20120127svn10526%{?dist}
-Summary:    JavaScript Engine
-Group:      System Environment/Libraries
-License:    BSD
-URL:        http://code.google.com/p/v8
+# %%global svnver 20110721svn8716
+
+Name:		v8
+Version:	%{somajor}.%{sominor}.%{sobuild}
+Release:	3%{?dist}
+Epoch:		1
+Summary:	JavaScript Engine
+Group:		System Environment/Libraries
+License:	BSD
+URL:		http://code.google.com/p/v8
 # No tarballs, pulled from svn
 # Checkout script is Source1
-Source0:    v8-%{version}-20120127svn10526.tar.bz2
-Source1:    v8-daily-tarball.sh
+Source0:	v8-%{version}.tar.bz2
+Source1:	v8-daily-tarball.sh
 # Enable experimental i18n extension that chromium needs
-Patch0:     v8-3.3.10-enable-experimental.patch
-# Remove unnecessary shebangs
-Patch3:     v8-2.5.9-shebangs.patch
-BuildRoot:  %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-ExclusiveArch:    %{ix86} x86_64 arm
-BuildRequires:    scons, readline-devel, libicu-devel
+Patch0:		v8-3.4.14-enable-experimental.patch
+# Fix experimental extensions compile
+Patch2:		v8-3.4.14-fix-experimental-compile.patch
+# Fix i18n.js to C conversion
+Patch3:		v8-3.4.14-i18n-js2c.patch
+BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+ExclusiveArch:	%{ix86} x86_64 arm
+BuildRequires:	scons, readline-devel, libicu-devel
 
 %description
 V8 is Google's open source JavaScript engine. V8 is written in C++ and is used 
@@ -40,24 +47,21 @@ in Google Chrome, the open source browser from Google. V8 implements ECMAScript
 as specified in ECMA-262, 3rd edition.
 
 %package devel
-Group:      Development/Libraries
-Summary:    Development headers and libraries for v8
-Requires:   %{name} = %{version}-%{release}
+Group:		Development/Libraries
+Summary:	Development headers and libraries for v8
+Requires:	%{name} = %{epoch}:%{version}-%{release}
 
 %description devel
 Development headers and libraries for v8.
 
 %prep
-%setup -q -n %{name}-%{version}-20120127svn10526
-#patch0 -p1 -b .experimental
-%patch3 -p1 -b .shebang
-
-#sed -i '/break-iterator.cc/d' src/SConscript
-#sed -i '/collator.cc/d' src/SConscript
-sed -i '/extensions\/experimental\//d' src/SConscript
+%setup -q -n %{name}-%{version}
+%patch0 -p1 -b .experimental
+%patch2 -p1 -b .fix
+%patch3 -p1 -b .i18n-js2c
 
 # -fno-strict-aliasing is needed with gcc 4.4 to get past some ugly code
-PARSED_OPT_FLAGS=`echo \'$RPM_OPT_FLAGS -fPIC -fno-strict-aliasing -Wno-unused-parameter -Wno-unused-but-set-variable\'| sed "s/ /',/g" | sed "s/',/', '/g"`
+PARSED_OPT_FLAGS=`echo \'$RPM_OPT_FLAGS -fPIC -fno-strict-aliasing -Wno-unused-parameter -Wno-error=strict-overflow -Wno-unused-but-set-variable\'| sed "s/ /',/g" | sed "s/',/', '/g"`
 sed -i "s|'-O3',|$PARSED_OPT_FLAGS,|g" SConstruct
 
 # clear spurious executable bits
@@ -67,19 +71,18 @@ find . \( -name \*.cc -o -name \*.h -o -name \*.py \) -a -executable \
     chmod -x $FILE
   done
 
-
 %build
-export GCC_VERSION="46"
-export COMPRESSION="off"
-scons library=shared snapshots=on verbose=on \
+mkdir -p obj/release/
+python src/extensions/experimental/i18n-js2c.py obj/release/i18n-libraries.cc src/extensions/experimental/i18n.js src/macros.py
+export GCC_VERSION="44"
+scons library=shared snapshots=on \
 %ifarch x86_64
 arch=x64 \
 %endif
 visibility=default \
-env=CCFLAGS:"-fPIC" \
-%{?_smp_mflags}
+env=CCFLAGS:"-fPIC"
 
-%if 0%{?fedora} > 15
+%if 0%{?fedora} >= 16
 export ICU_LINK_FLAGS=`pkg-config --libs-only-l icu-i18n`
 %else
 export ICU_LINK_FLAGS=`pkg-config --libs-only-l icu`
@@ -90,25 +93,35 @@ export ICU_LINK_FLAGS=`pkg-config --libs-only-l icu`
 rm -rf libv8.so libv8preparser.so
 # Now, lets make it right.
 g++ $RPM_OPT_FLAGS -fPIC -o libv8preparser.so.%{sover} -shared -Wl,-soname,libv8preparser.so.%{somajor} \
-        obj/release/allocation.os \
-        obj/release/hashmap.os \
-        obj/release/preparse-data.os \
-        obj/release/preparser-api.os \
-        obj/release/preparser.os \
-        obj/release/token.os \
-        obj/release/unicode.os
+	obj/release/allocation.os \
+	obj/release/bignum.os \
+	obj/release/bignum-dtoa.os \
+	obj/release/cached-powers.os \
+	obj/release/diy-fp.os \
+	obj/release/dtoa.os \
+	obj/release/fast-dtoa.os \
+	obj/release/fixed-dtoa.os \
+	obj/release/hashmap.os \
+	obj/release/preparse-data.os \
+	obj/release/preparser-api.os \
+	obj/release/preparser.os \
+	obj/release/scanner.os \
+	obj/release/strtod.os \
+	obj/release/token.os \
+	obj/release/unicode.os \
+	obj/release/utils.os
 
 # "obj/release/preparser-api.os" should not be included in the libv8.so file.
 export RELEASE_BUILD_OBJS=`echo obj/release/*.os | sed 's|obj/release/preparser-api.os||g'`
 
 %ifarch arm
-g++ $RPM_OPT_FLAGS -fPIC -o libv8.so.%{sover} -shared -Wl,-soname,libv8.so.%{somajor} $RELEASE_BUILD_OBJS obj/release/extensions/*.os obj/release/arm/*.os $ICU_LINK_FLAGS
+g++ $RPM_OPT_FLAGS -fPIC -o libv8.so.%{sover} -shared -Wl,-soname,libv8.so.%{somajor} $RELEASE_BUILD_OBJS obj/release/extensions/*.os obj/release/extensions/experimental/*.os obj/release/arm/*.os $ICU_LINK_FLAGS
 %endif
 %ifarch %{ix86}
-g++ $RPM_OPT_FLAGS -fPIC -o libv8.so.%{sover} -shared -Wl,-soname,libv8.so.%{somajor} $RELEASE_BUILD_OBJS obj/release/extensions/*.os obj/release/ia32/*.os $ICU_LINK_FLAGS
+g++ $RPM_OPT_FLAGS -fPIC -o libv8.so.%{sover} -shared -Wl,-soname,libv8.so.%{somajor} $RELEASE_BUILD_OBJS obj/release/extensions/*.os obj/release/extensions/experimental/*.os obj/release/ia32/*.os $ICU_LINK_FLAGS
 %endif
 %ifarch x86_64
-g++ $RPM_OPT_FLAGS -fPIC -o libv8.so.%{sover} -shared -Wl,-soname,libv8.so.%{somajor} $RELEASE_BUILD_OBJS obj/release/extensions/*.os obj/release/x64/*.os $ICU_LINK_FLAGS
+g++ $RPM_OPT_FLAGS -fPIC -o libv8.so.%{sover} -shared -Wl,-soname,libv8.so.%{somajor} $RELEASE_BUILD_OBJS obj/release/extensions/*.os obj/release/extensions/experimental/*.os obj/release/x64/*.os $ICU_LINK_FLAGS
 %endif
 
 # We need to do this so d8 can link against it.
@@ -125,7 +138,7 @@ library=shared snapshots=on console=readline visibility=default || :
 # Sigh. I f*****g hate scons.
 rm -rf d8
 
-g++ $RPM_OPT_FLAGS -o d8 obj/release/d8.os -lpthread -lreadline -lpthread -L. -lv8 $ICU_LINK_FLAGS
+g++ $RPM_OPT_FLAGS -o d8 obj/release/d8.os -lreadline -lpthread -L. -lv8 $ICU_LINK_FLAGS
 
 %install
 rm -rf %{buildroot}
@@ -150,13 +163,19 @@ chmod -x %{buildroot}%{_includedir}/v8*.h
 
 mkdir -p %{buildroot}%{_includedir}/v8/extensions/experimental/
 install -p src/extensions/*.h %{buildroot}%{_includedir}/v8/extensions/
+install -p src/extensions/experimental/*.h %{buildroot}%{_includedir}/v8/extensions/experimental/
 
 chmod -x %{buildroot}%{_includedir}/v8/extensions/*.h
+chmod -x %{buildroot}%{_includedir}/v8/extensions/experimental/*.h
 
 # install Python JS minifier scripts for nodejs
 install -d %{buildroot}%{python_sitelib}
+sed -i 's|/usr/bin/python2.4|/usr/bin/env python|g' tools/jsmin.py
+sed -i 's|/usr/bin/python2.4|/usr/bin/env python|g' tools/js2c.py
 install -p -m0744 tools/jsmin.py %{buildroot}%{python_sitelib}/
+install -p -m0744 tools/js2c.py %{buildroot}%{python_sitelib}/
 chmod -R -x %{buildroot}%{python_sitelib}/*.py*
+
 
 %clean
 rm -rf %{buildroot}
@@ -179,27 +198,21 @@ rm -rf %{buildroot}
 %{python_sitelib}/j*.py*
 
 %changelog
-* Fri Jan 27 2012 Thomas Spura <tomspur@fedoraproject.org> - 3.8.9-1.20120127svn10526
-- update to 3.8.9
-- some patches not applicable anymore
-- experimental i18n extension patch doesn't work anymore
+* Tue Mar 20 2012 Tom Callaway <spot@fedoraproject.org> 3.7.12-3
+- merge changes from Fedora spec file, sync, add epoch
 
-* Sat Jan 14 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 3.3.10-5
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_17_Mass_Rebuild
+* Fri Feb 17 2012 Tom Callaway <spot@fedoraproject.org> 3.7.12-2
+- add -Wno-error=strict-overflow for gcc 4.7 (hack, hack, hack)
 
-* Sat Aug 27 2011 Matěj Cepl <mcepl@redhat.com> - 3.3.10-4
-- Make jsmin.py working.
+* Mon Feb 13 2012 Tom Callaway <spot@fedoraproject.org> 3.7.12-1
+- update to 3.7.12
 
-* Wed Aug 24 2011 Matěj Cepl <mcepl@redhat.com> - 3.3.10-3
-- A bit of cleanup, include also /usr/bin/j2sc when we have it.
-- I don't see the reason why Python files shouldn't be in the
-  standard Python directories.
+* Thu Nov  3 2011 Tom Callaway <spot@fedoraproject.org> 3.5.10-1
+- update to 3.5.10
 
-* Wed Aug 23 2011 T.C. Hollingsworth <tchollingsworth@gmail.com 3.3.10-2
+* Mon Sep 26 2011 Tom Callaway <spot@fedoraproject.org> 3.4.14-2
+- final 3.4.14 tag
 - include JavaScript minifier scripts in -devel
-
-* Wed Aug 10 2011 Tom Callaway <spot@fedoraproject.org> 3.3.10-1
-- tag 3.3.10
 
 * Fri Jun 10 2011 Tom Callaway <spot@fedoraproject.org> 3.2.10-1
 - tag 3.2.10
