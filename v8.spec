@@ -21,7 +21,7 @@
 
 Name:		v8
 Version:	%{somajor}.%{sominor}.%{sobuild}
-Release:	3%{?dist}
+Release:	4%{?dist}
 Epoch:		1
 Summary:	JavaScript Engine
 Group:		System Environment/Libraries
@@ -38,7 +38,7 @@ Patch2:		v8-3.4.14-fix-experimental-compile.patch
 # Fix i18n.js to C conversion
 Patch3:		v8-3.4.14-i18n-js2c.patch
 BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-ExclusiveArch:	%{ix86} x86_64 arm
+ExclusiveArch:	%{ix86} x86_64 %{arm}
 BuildRequires:	scons, readline-devel, libicu-devel
 
 %description
@@ -79,6 +79,12 @@ scons library=shared snapshots=on \
 %ifarch x86_64
 arch=x64 \
 %endif
+%ifarch armv7hl armv7hnl
+armeabi=hard \
+%endif
+%ifarch armv5tel armv6l armv7l
+armeabi=soft \
+%endif
 visibility=default \
 env=CCFLAGS:"-fPIC"
 
@@ -114,7 +120,7 @@ g++ $RPM_OPT_FLAGS -fPIC -o libv8preparser.so.%{sover} -shared -Wl,-soname,libv8
 # "obj/release/preparser-api.os" should not be included in the libv8.so file.
 export RELEASE_BUILD_OBJS=`echo obj/release/*.os | sed 's|obj/release/preparser-api.os||g'`
 
-%ifarch arm
+%ifarch %{arm}
 g++ $RPM_OPT_FLAGS -fPIC -o libv8.so.%{sover} -shared -Wl,-soname,libv8.so.%{somajor} $RELEASE_BUILD_OBJS obj/release/extensions/*.os obj/release/extensions/experimental/*.os obj/release/arm/*.os $ICU_LINK_FLAGS
 %endif
 %ifarch %{ix86}
@@ -198,6 +204,10 @@ rm -rf %{buildroot}
 %{python_sitelib}/j*.py*
 
 %changelog
+* Thu Mar 29 2012 Dennis Gilmore <dennis@ausil.us> 1:3.7.12-4
+- use correct arm macros
+- use the correct abis for hard and soft float
+
 * Tue Mar 20 2012 Tom Callaway <spot@fedoraproject.org> 3.7.12-3
 - merge changes from Fedora spec file, sync, add epoch
 
