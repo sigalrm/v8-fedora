@@ -21,7 +21,7 @@
 
 Name:		v8
 Version:	%{somajor}.%{sominor}.%{sobuild}
-Release:	4%{?dist}
+Release:	5%{?dist}
 Epoch:		1
 Summary:	JavaScript Engine
 Group:		System Environment/Libraries
@@ -139,6 +139,12 @@ scons d8 \
 %ifarch x86_64
 arch=x64 \
 %endif
+%ifarch armv7hl armv7hnl
+armeabi=hard \
+%endif
+%ifarch armv5tel armv6l armv7l
+armeabi=soft \
+%endif
 library=shared snapshots=on console=readline visibility=default || :
 
 # Sigh. I f*****g hate scons.
@@ -204,6 +210,9 @@ rm -rf %{buildroot}
 %{python_sitelib}/j*.py*
 
 %changelog
+* Fri Mar 30 2012 Dennis Gilmore <dennis@ausil.us> 1:3.7.12-5
+- make sure the right arm abi is used in the second call of scons
+
 * Thu Mar 29 2012 Dennis Gilmore <dennis@ausil.us> 1:3.7.12-4
 - use correct arm macros
 - use the correct abis for hard and soft float
