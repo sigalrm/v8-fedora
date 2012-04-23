@@ -21,7 +21,7 @@
 
 Name:		v8
 Version:	%{somajor}.%{sominor}.%{sobuild}
-Release:	5%{?dist}
+Release:	6%{?dist}
 Epoch:		1
 Summary:	JavaScript Engine
 Group:		System Environment/Libraries
@@ -210,6 +210,9 @@ rm -rf %{buildroot}
 %{python_sitelib}/j*.py*
 
 %changelog
+* Mon Apr 23 2012 Thomas Spura <tomspur@fedoraproject.org> 1:3.7.12.6
+- rebuild for icu-49
+
 * Fri Mar 30 2012 Dennis Gilmore <dennis@ausil.us> 1:3.7.12-5
 - make sure the right arm abi is used in the second call of scons
 
