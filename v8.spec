@@ -13,15 +13,15 @@
 # For the 1.2 branch, we use 0s here
 # For 1.3+, we use the three digit versions
 %global somajor 3
-%global sominor 7
-%global sobuild 12
+%global sominor 10
+%global sobuild 8
 %global sover %{somajor}.%{sominor}.%{sobuild}
 
 # %%global svnver 20110721svn8716
 
 Name:		v8
 Version:	%{somajor}.%{sominor}.%{sobuild}
-Release:	6%{?dist}
+Release:	1%{?dist}
 Epoch:		1
 Summary:	JavaScript Engine
 Group:		System Environment/Libraries
@@ -31,12 +31,6 @@ URL:		http://code.google.com/p/v8
 # Checkout script is Source1
 Source0:	v8-%{version}.tar.bz2
 Source1:	v8-daily-tarball.sh
-# Enable experimental i18n extension that chromium needs
-Patch0:		v8-3.4.14-enable-experimental.patch
-# Fix experimental extensions compile
-Patch2:		v8-3.4.14-fix-experimental-compile.patch
-# Fix i18n.js to C conversion
-Patch3:		v8-3.4.14-i18n-js2c.patch
 BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 ExclusiveArch:	%{ix86} x86_64 %{arm}
 BuildRequires:	scons, readline-devel, libicu-devel
@@ -56,9 +50,6 @@ Development headers and libraries for v8.
 
 %prep
 %setup -q -n %{name}-%{version}
-%patch0 -p1 -b .experimental
-%patch2 -p1 -b .fix
-%patch3 -p1 -b .i18n-js2c
 
 # -fno-strict-aliasing is needed with gcc 4.4 to get past some ugly code
 PARSED_OPT_FLAGS=`echo \'$RPM_OPT_FLAGS -fPIC -fno-strict-aliasing -Wno-unused-parameter -Wno-error=strict-overflow -Wno-unused-but-set-variable\'| sed "s/ /',/g" | sed "s/',/', '/g"`
@@ -73,7 +64,6 @@ find . \( -name \*.cc -o -name \*.h -o -name \*.py \) -a -executable \
 
 %build
 mkdir -p obj/release/
-python src/extensions/experimental/i18n-js2c.py obj/release/i18n-libraries.cc src/extensions/experimental/i18n.js src/macros.py
 export GCC_VERSION="44"
 scons library=shared snapshots=on \
 %ifarch x86_64
@@ -107,7 +97,6 @@ g++ $RPM_OPT_FLAGS -fPIC -o libv8preparser.so.%{sover} -shared -Wl,-soname,libv8
 	obj/release/dtoa.os \
 	obj/release/fast-dtoa.os \
 	obj/release/fixed-dtoa.os \
-	obj/release/hashmap.os \
 	obj/release/preparse-data.os \
 	obj/release/preparser-api.os \
 	obj/release/preparser.os \
@@ -121,13 +110,13 @@ g++ $RPM_OPT_FLAGS -fPIC -o libv8preparser.so.%{sover} -shared -Wl,-soname,libv8
 export RELEASE_BUILD_OBJS=`echo obj/release/*.os | sed 's|obj/release/preparser-api.os||g'`
 
 %ifarch %{arm}
-g++ $RPM_OPT_FLAGS -fPIC -o libv8.so.%{sover} -shared -Wl,-soname,libv8.so.%{somajor} $RELEASE_BUILD_OBJS obj/release/extensions/*.os obj/release/extensions/experimental/*.os obj/release/arm/*.os $ICU_LINK_FLAGS
+g++ $RPM_OPT_FLAGS -fPIC -o libv8.so.%{sover} -shared -Wl,-soname,libv8.so.%{somajor} $RELEASE_BUILD_OBJS obj/release/extensions/*.os obj/release/arm/*.os $ICU_LINK_FLAGS
 %endif
 %ifarch %{ix86}
-g++ $RPM_OPT_FLAGS -fPIC -o libv8.so.%{sover} -shared -Wl,-soname,libv8.so.%{somajor} $RELEASE_BUILD_OBJS obj/release/extensions/*.os obj/release/extensions/experimental/*.os obj/release/ia32/*.os $ICU_LINK_FLAGS
+g++ $RPM_OPT_FLAGS -fPIC -o libv8.so.%{sover} -shared -Wl,-soname,libv8.so.%{somajor} $RELEASE_BUILD_OBJS obj/release/extensions/*.os obj/release/ia32/*.os $ICU_LINK_FLAGS
 %endif
 %ifarch x86_64
-g++ $RPM_OPT_FLAGS -fPIC -o libv8.so.%{sover} -shared -Wl,-soname,libv8.so.%{somajor} $RELEASE_BUILD_OBJS obj/release/extensions/*.os obj/release/extensions/experimental/*.os obj/release/x64/*.os $ICU_LINK_FLAGS
+g++ $RPM_OPT_FLAGS -fPIC -o libv8.so.%{sover} -shared -Wl,-soname,libv8.so.%{somajor} $RELEASE_BUILD_OBJS obj/release/extensions/*.os obj/release/x64/*.os $ICU_LINK_FLAGS
 %endif
 
 # We need to do this so d8 can link against it.
@@ -173,12 +162,10 @@ popd
 
 chmod -x %{buildroot}%{_includedir}/v8*.h
 
-mkdir -p %{buildroot}%{_includedir}/v8/extensions/experimental/
+mkdir -p %{buildroot}%{_includedir}/v8/extensions/
 install -p src/extensions/*.h %{buildroot}%{_includedir}/v8/extensions/
-install -p src/extensions/experimental/*.h %{buildroot}%{_includedir}/v8/extensions/experimental/
 
 chmod -x %{buildroot}%{_includedir}/v8/extensions/*.h
-chmod -x %{buildroot}%{_includedir}/v8/extensions/experimental/*.h
 
 # install Python JS minifier scripts for nodejs
 install -d %{buildroot}%{python_sitelib}
@@ -187,7 +174,6 @@ sed -i 's|/usr/bin/python2.4|/usr/bin/env python|g' tools/js2c.py
 install -p -m0744 tools/jsmin.py %{buildroot}%{python_sitelib}/
 install -p -m0744 tools/js2c.py %{buildroot}%{python_sitelib}/
 chmod -R -x %{buildroot}%{python_sitelib}/*.py*
-
 
 %clean
 rm -rf %{buildroot}
@@ -210,6 +196,12 @@ rm -rf %{buildroot}
 %{python_sitelib}/j*.py*
 
 %changelog
+* Fri Jul  6 2012 Tom Callaway <spot@fedoraproject.org> 1:3.10.8-1
+- update to 3.10.8 (chromium 20)
+
+* Tue Jun 12 2012 Tom Callaway <spot@fedoraproject.org> 1:3.9.24-1
+- update to 3.9.24 (chromium 19)
+
 * Mon Apr 23 2012 Thomas Spura <tomspur@fedoraproject.org> 1:3.7.12.6
 - rebuild for icu-49
 
