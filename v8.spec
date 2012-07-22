@@ -21,7 +21,7 @@
 
 Name:		v8
 Version:	%{somajor}.%{sominor}.%{sobuild}
-Release:	1%{?dist}
+Release:	2%{?dist}
 Epoch:		1
 Summary:	JavaScript Engine
 Group:		System Environment/Libraries
@@ -196,6 +196,9 @@ rm -rf %{buildroot}
 %{python_sitelib}/j*.py*
 
 %changelog
+* Sun Jul 22 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1:3.10.8-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_18_Mass_Rebuild
+
 * Fri Jul  6 2012 Tom Callaway <spot@fedoraproject.org> 1:3.10.8-1
 - update to 3.10.8 (chromium 20)
 
