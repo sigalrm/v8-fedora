@@ -12,25 +12,24 @@
 
 # For the 1.2 branch, we use 0s here
 # For 1.3+, we use the three digit versions
+# Hey, now there are four digits. What do they mean? Popsicle.
 %global somajor 3
-%global sominor 10
-%global sobuild 8
+%global sominor 13
+%global sobuild 7
+%global sotiny 5
 %global sover %{somajor}.%{sominor}.%{sobuild}
 
 # %%global svnver 20110721svn8716
 
 Name:		v8
-Version:	%{somajor}.%{sominor}.%{sobuild}
-Release:	2%{?dist}
+Version:	%{somajor}.%{sominor}.%{sobuild}.%{sotiny}
+Release:	1%{?dist}
 Epoch:		1
 Summary:	JavaScript Engine
 Group:		System Environment/Libraries
 License:	BSD
 URL:		http://code.google.com/p/v8
-# No tarballs, pulled from svn
-# Checkout script is Source1
-Source0:	v8-%{version}.tar.bz2
-Source1:	v8-daily-tarball.sh
+Source0:	http://commondatastorage.googleapis.com/chromium-browser-official/v8-%{version}.tar.bz2
 BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 ExclusiveArch:	%{ix86} x86_64 %{arm}
 BuildRequires:	scons, readline-devel, libicu-devel
@@ -124,6 +123,7 @@ ln -sf libv8.so.%{sover} libv8.so
 ln -sf libv8preparser.so.%{sover} libv8preparser.so
 
 # This will fail to link d8 because it doesn't use the icu libs.
+# Don't build d8 shared. Stupid Google. Hate.
 scons d8 \
 %ifarch x86_64
 arch=x64 \
@@ -134,12 +134,14 @@ armeabi=hard \
 %ifarch armv5tel armv6l armv7l
 armeabi=soft \
 %endif
-library=shared snapshots=on console=readline visibility=default || :
+snapshots=on console=readline visibility=default || :
+# library=shared snapshots=on console=readline visibility=default || :
 
 # Sigh. I f*****g hate scons.
-rm -rf d8
+# But gyp is worse.
+# rm -rf d8
 
-g++ $RPM_OPT_FLAGS -o d8 obj/release/d8.os -lreadline -lpthread -L. -lv8 $ICU_LINK_FLAGS
+# g++ $RPM_OPT_FLAGS -o d8 obj/release/d8.os -lreadline -lpthread -L. -lv8 $ICU_LINK_FLAGS
 
 %install
 rm -rf %{buildroot}
@@ -196,6 +198,11 @@ rm -rf %{buildroot}
 %{python_sitelib}/j*.py*
 
 %changelog
+* Tue Dec  4 2012 Tom Callaway <spot@fedoraproject.org> - 1:3.13.7.5-1
+- update to 3.13.7.5 (needed for chromium 23)
+- Resolves multiple security issues (CVE-2012-5120, CVE-2012-5128)
+- d8 is now using a static libv8, resolves bz 881973)
+
 * Sun Jul 22 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1:3.10.8-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_18_Mass_Rebuild
 
