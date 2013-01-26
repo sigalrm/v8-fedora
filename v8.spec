@@ -51,7 +51,7 @@ Development headers and libraries for v8.
 %setup -q -n %{name}-%{version}
 
 # -fno-strict-aliasing is needed with gcc 4.4 to get past some ugly code
-PARSED_OPT_FLAGS=`echo \'$RPM_OPT_FLAGS -fPIC -fno-strict-aliasing -Wno-unused-parameter -Wno-error=strict-overflow -Wno-unused-but-set-variable\'| sed "s/ /',/g" | sed "s/',/', '/g"`
+PARSED_OPT_FLAGS=`echo \'$RPM_OPT_FLAGS -fPIC -fno-strict-aliasing -Wno-unused-parameter -Wno-error=strict-overflow -Wno-error=unused-local-typedefs -Wno-unused-but-set-variable\'| sed "s/ /',/g" | sed "s/',/', '/g"`
 sed -i "s|'-O3',|$PARSED_OPT_FLAGS,|g" SConstruct
 
 # clear spurious executable bits
@@ -200,6 +200,7 @@ rm -rf %{buildroot}
 %changelog
 * Sat Jan 26 2013 T.C. Hollingsworth <tchollingsworth@gmail.com> - 1:3.13.7.5-2
 - rebuild for icu-50
+- ignore new GCC 4.8 warning
 
 * Tue Dec  4 2012 Tom Callaway <spot@fedoraproject.org> - 1:3.13.7.5-1
 - update to 3.13.7.5 (needed for chromium 23)
