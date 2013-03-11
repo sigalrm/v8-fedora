@@ -14,16 +14,16 @@
 # For 1.3+, we use the three digit versions
 # Hey, now there are four digits. What do they mean? Popsicle.
 %global somajor 3
-%global sominor 13
-%global sobuild 7
-%global sotiny 5
+%global sominor 14
+%global sobuild 5
+%global sotiny 7
 %global sover %{somajor}.%{sominor}.%{sobuild}
 
 # %%global svnver 20110721svn8716
 
 Name:		v8
 Version:	%{somajor}.%{sominor}.%{sobuild}.%{sotiny}
-Release:	2%{?dist}
+Release:	3%{?dist}
 Epoch:		1
 Summary:	JavaScript Engine
 Group:		System Environment/Libraries
@@ -64,6 +64,9 @@ find . \( -name \*.cc -o -name \*.h -o -name \*.py \) -a -executable \
 %build
 mkdir -p obj/release/
 export GCC_VERSION="44"
+
+# SCons is going away, but for now build with
+# I_know_I_should_build_with_GYP=yes
 scons library=shared snapshots=on \
 %ifarch x86_64
 arch=x64 \
@@ -75,7 +78,8 @@ armeabi=hard \
 armeabi=soft \
 %endif
 visibility=default \
-env=CCFLAGS:"-fPIC"
+env=CCFLAGS:"-fPIC" \
+I_know_I_should_build_with_GYP=yes
 
 %if 0%{?fedora} >= 16
 export ICU_LINK_FLAGS=`pkg-config --libs-only-l icu-i18n`
@@ -124,7 +128,10 @@ ln -sf libv8preparser.so.%{sover} libv8preparser.so
 
 # This will fail to link d8 because it doesn't use the icu libs.
 # Don't build d8 shared. Stupid Google. Hate.
+# SCons is going away, but for now build with
+# I_know_I_should_build_with_GYP=yes
 scons d8 \
+I_know_I_should_build_with_GYP=yes \
 %ifarch x86_64
 arch=x64 \
 %endif
@@ -198,6 +205,9 @@ rm -rf %{buildroot}
 %{python_sitelib}/j*.py*
 
 %changelog
+* Mon Mar 11 2013 Stephen Gallagher <sgallagh@redhat.com> - 1:3.14.5.7-3
+- Update to v8 3.14.5.7 for Node.js 0.10.0
+
 * Sat Jan 26 2013 T.C. Hollingsworth <tchollingsworth@gmail.com> - 1:3.13.7.5-2
 - rebuild for icu-50
 - ignore new GCC 4.8 warning
