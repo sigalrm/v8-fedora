@@ -34,6 +34,9 @@ BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 ExclusiveArch:	%{ix86} x86_64 %{arm}
 BuildRequires:	scons, readline-devel, libicu-devel
 
+#backport fix for CVE-2013-2634 (RHBZ#924495)
+Patch1:		v8-3.14.5.8-CVE-2013-2634.patch
+
 %description
 V8 is Google's open source JavaScript engine. V8 is written in C++ and is used 
 in Google Chrome, the open source browser from Google. V8 implements ECMAScript 
@@ -49,6 +52,7 @@ Development headers and libraries for v8.
 
 %prep
 %setup -q -n %{name}-%{version}
+%patch1 -p1
 
 # -fno-strict-aliasing is needed with gcc 4.4 to get past some ugly code
 PARSED_OPT_FLAGS=`echo \'$RPM_OPT_FLAGS -fPIC -fno-strict-aliasing -Wno-unused-parameter -Wno-error=strict-overflow -Wno-error=unused-local-typedefs -Wno-unused-but-set-variable\'| sed "s/ /',/g" | sed "s/',/', '/g"`
@@ -207,6 +211,7 @@ rm -rf %{buildroot}
 %changelog
 * Fri Mar 22 2013 T.C. Hollingsworth <tchollingsworth@gmail.com> - 1:3.14.5.8-1
 - new upstream release 3.14.5.8
+- backport security fix for remote DoS via crafted javascript (RHBZ#924495; CVE-2013-2632)
 
 * Mon Mar 11 2013 Stephen Gallagher <sgallagh@redhat.com> - 1:3.14.5.7-3
 - Update to v8 3.14.5.7 for Node.js 0.10.0
