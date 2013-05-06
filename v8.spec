@@ -23,7 +23,7 @@
 
 Name:		v8
 Version:	%{somajor}.%{sominor}.%{sobuild}.%{sotiny}
-Release:	1%{?dist}
+Release:	2%{?dist}
 Epoch:		1
 Summary:	JavaScript Engine
 Group:		System Environment/Libraries
@@ -204,11 +204,15 @@ rm -rf %{buildroot}
 %files devel
 %defattr(-,root,root,-)
 %{_includedir}/*.h
+%dir %{_includedir}/v8/
 %{_includedir}/v8/extensions/
 %{_libdir}/*.so
 %{python_sitelib}/j*.py*
 
 %changelog
+* Mon May 06 2013 Stanislav Ochotnicky <sochotnicky@redhat.com> - 1:3.14.5.8-2
+- Fix ownership of include directory (#958729)
+
 * Fri Mar 22 2013 T.C. Hollingsworth <tchollingsworth@gmail.com> - 1:3.14.5.8-1
 - new upstream release 3.14.5.8
 - backport security fix for remote DoS via crafted javascript (RHBZ#924495; CVE-2013-2632)
