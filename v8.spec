@@ -16,14 +16,14 @@
 %global somajor 3
 %global sominor 14
 %global sobuild 5
-%global sotiny 8
+%global sotiny 10
 %global sover %{somajor}.%{sominor}.%{sobuild}
 
 # %%global svnver 20110721svn8716
 
 Name:		v8
 Version:	%{somajor}.%{sominor}.%{sobuild}.%{sotiny}
-Release:	2%{?dist}
+Release:	1%{?dist}
 Epoch:		1
 Summary:	JavaScript Engine
 Group:		System Environment/Libraries
@@ -210,6 +210,9 @@ rm -rf %{buildroot}
 %{python_sitelib}/j*.py*
 
 %changelog
+* Wed May 29 2013 T.C. Hollingsworth <tchollingsworth@gmail.com> - 1:3.14.5.10-1
+- new upstream release 3.14.5.10
+
 * Mon May 06 2013 Stanislav Ochotnicky <sochotnicky@redhat.com> - 1:3.14.5.8-2
 - Fix ownership of include directory (#958729)
 
