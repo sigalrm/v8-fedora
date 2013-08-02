@@ -23,7 +23,7 @@
 
 Name:		v8
 Version:	%{somajor}.%{sominor}.%{sobuild}.%{sotiny}
-Release:	1%{?dist}
+Release:	2%{?dist}
 Epoch:		1
 Summary:	JavaScript Engine
 Group:		System Environment/Libraries
@@ -36,6 +36,9 @@ BuildRequires:	scons, readline-devel, libicu-devel
 
 #backport fix for CVE-2013-2634 (RHBZ#924495)
 Patch1:		v8-3.14.5.8-CVE-2013-2634.patch
+
+#backport fix for CVE-2013-2882 (RHBZ#991116)
+Patch2:     v8-3.14.5.10-CVE-2013-2882.patch
 
 %description
 V8 is Google's open source JavaScript engine. V8 is written in C++ and is used 
@@ -53,6 +56,7 @@ Development headers and libraries for v8.
 %prep
 %setup -q -n %{name}-%{version}
 %patch1 -p1
+%patch2 -p1
 
 # -fno-strict-aliasing is needed with gcc 4.4 to get past some ugly code
 PARSED_OPT_FLAGS=`echo \'$RPM_OPT_FLAGS -fPIC -fno-strict-aliasing -Wno-unused-parameter -Wno-error=strict-overflow -Wno-error=unused-local-typedefs -Wno-unused-but-set-variable\'| sed "s/ /',/g" | sed "s/',/', '/g"`
@@ -210,6 +214,10 @@ rm -rf %{buildroot}
 %{python_sitelib}/j*.py*
 
 %changelog
+* Fri Aug 02 2013 T.C. Hollingsworth <tchollingsworth@gmail.com> - 1:3.14.5.10-2
+- backport fix for remote DoS or unspecified other impact via type confusion
+  (RHBZ#991116; CVE-2013-2882)
+
 * Wed May 29 2013 T.C. Hollingsworth <tchollingsworth@gmail.com> - 1:3.14.5.10-1
 - new upstream release 3.14.5.10
 
