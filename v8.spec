@@ -23,7 +23,7 @@
 
 Name:		v8
 Version:	%{somajor}.%{sominor}.%{sobuild}.%{sotiny}
-Release:	3%{?dist}
+Release:	4%{?dist}
 Epoch:		1
 Summary:	JavaScript Engine
 Group:		System Environment/Libraries
@@ -43,6 +43,10 @@ Patch2:     v8-3.14.5.10-CVE-2013-2882.patch
 #backport fix for CVE-2013-6640 (RHBZ#1039889)
 Patch3:     v8-3.14.5.10-CVE-2013-6640.patch
 
+#backport fix for enumeration for objects with lots of properties
+#   https://codereview.chromium.org/11362182
+Patch4:     v8-3.14.5.10-enumeration.patch
+
 %description
 V8 is Google's open source JavaScript engine. V8 is written in C++ and is used 
 in Google Chrome, the open source browser from Google. V8 implements ECMAScript 
@@ -61,6 +65,7 @@ Development headers and libraries for v8.
 %patch1 -p1
 %patch2 -p1
 %patch3 -p1
+%patch4 -p1
 
 # -fno-strict-aliasing is needed with gcc 4.4 to get past some ugly code
 PARSED_OPT_FLAGS=`echo \'$RPM_OPT_FLAGS -fPIC -fno-strict-aliasing -Wno-unused-parameter -Wno-error=strict-overflow -Wno-error=unused-local-typedefs -Wno-unused-but-set-variable\'| sed "s/ /',/g" | sed "s/',/', '/g"`
@@ -218,6 +223,9 @@ rm -rf %{buildroot}
 %{python_sitelib}/j*.py*
 
 %changelog
+* Mon Jan 27 2014 T.C. Hollingsworth <tchollingsworth@gmail.com> - 1:3.14.5.10-4
+- backport fix for enumeration for objects with lots of properties
+
 * Fri Dec 13 2013 T.C. Hollingsworth <tchollingsworth@gmail.com> - 1:3.14.5.10-3
 - backport fix for out-of-bounds read DoS (RHBZ#1039889; CVE-2013-6640)
 
