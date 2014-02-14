@@ -23,7 +23,7 @@
 
 Name:		v8
 Version:	%{somajor}.%{sominor}.%{sobuild}.%{sotiny}
-Release:	4%{?dist}
+Release:	5%{?dist}
 Epoch:		1
 Summary:	JavaScript Engine
 Group:		System Environment/Libraries
@@ -223,6 +223,9 @@ rm -rf %{buildroot}
 %{python_sitelib}/j*.py*
 
 %changelog
+* Fri Feb 14 2014 T.C. Hollingsworth <tchollingsworth@gmail.com> - 1:3.14.5.10-5
+- rebuild for icu-52
+
 * Mon Jan 27 2014 T.C. Hollingsworth <tchollingsworth@gmail.com> - 1:3.14.5.10-4
 - backport fix for enumeration for objects with lots of properties
 
