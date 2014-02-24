@@ -23,7 +23,7 @@
 
 Name:		v8
 Version:	%{somajor}.%{sominor}.%{sobuild}.%{sotiny}
-Release:	5%{?dist}
+Release:	6%{?dist}
 Epoch:		1
 Summary:	JavaScript Engine
 Group:		System Environment/Libraries
@@ -47,6 +47,10 @@ Patch3:     v8-3.14.5.10-CVE-2013-6640.patch
 #   https://codereview.chromium.org/11362182
 Patch4:     v8-3.14.5.10-enumeration.patch
 
+#backport fix for CVE-2013-6640 (RHBZ#1059070)
+Patch5:     v8-3.14.5.10-CVE-2013-6650.patch
+
+
 %description
 V8 is Google's open source JavaScript engine. V8 is written in C++ and is used 
 in Google Chrome, the open source browser from Google. V8 implements ECMAScript 
@@ -66,6 +70,7 @@ Development headers and libraries for v8.
 %patch2 -p1
 %patch3 -p1
 %patch4 -p1
+%patch5 -p1
 
 # -fno-strict-aliasing is needed with gcc 4.4 to get past some ugly code
 PARSED_OPT_FLAGS=`echo \'$RPM_OPT_FLAGS -fPIC -fno-strict-aliasing -Wno-unused-parameter -Wno-error=strict-overflow -Wno-error=unused-local-typedefs -Wno-unused-but-set-variable\'| sed "s/ /',/g" | sed "s/',/', '/g"`
@@ -223,6 +228,9 @@ rm -rf %{buildroot}
 %{python_sitelib}/j*.py*
 
 %changelog
+* Mon Feb 24 2014 Tomas Hrcka <thrcka@redhat.com> - 1:3.14.5.10-6
+- Backport fix for incorrect handling of popular pages (RHBZ#1059070; CVE-2013-6640)
+
 * Fri Feb 14 2014 T.C. Hollingsworth <tchollingsworth@gmail.com> - 1:3.14.5.10-5
 - rebuild for icu-52
 
