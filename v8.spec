@@ -23,7 +23,7 @@
 
 Name:		v8
 Version:	%{somajor}.%{sominor}.%{sobuild}.%{sotiny}
-Release:	6%{?dist}
+Release:	7%{?dist}
 Epoch:		1
 Summary:	JavaScript Engine
 Group:		System Environment/Libraries
@@ -49,6 +49,10 @@ Patch4:     v8-3.14.5.10-enumeration.patch
 
 #backport fix for CVE-2013-6640 (RHBZ#1059070)
 Patch5:     v8-3.14.5.10-CVE-2013-6650.patch
+
+#backport only applicable fix for CVE-2014-1704 (RHBZ#1077136)
+#the other two patches don't affect this version of v8
+Patch6:     v8-3.14.5.10-CVE-2014-1704-1.patch
 
 
 %description
@@ -228,6 +232,9 @@ rm -rf %{buildroot}
 %{python_sitelib}/j*.py*
 
 %changelog
+* Tue Mar 18 2014 T.C. Hollingsworth <tchollingsworth@gmail.com> - 1:3.14.5.10-7
+- backport fix for unsigned integer arithmetic (RHBZ#1077136; CVE-2014-1704)
+
 * Mon Feb 24 2014 Tomas Hrcka <thrcka@redhat.com> - 1:3.14.5.10-6
 - Backport fix for incorrect handling of popular pages (RHBZ#1059070; CVE-2013-6640)
 
