@@ -23,7 +23,7 @@
 
 Name:		v8
 Version:	%{somajor}.%{sominor}.%{sobuild}.%{sotiny}
-Release:	7%{?dist}
+Release:	8%{?dist}
 Epoch:		1
 Summary:	JavaScript Engine
 Group:		System Environment/Libraries
@@ -54,6 +54,12 @@ Patch5:     v8-3.14.5.10-CVE-2013-6650.patch
 #the other two patches don't affect this version of v8
 Patch6:     v8-3.14.5.10-CVE-2014-1704-1.patch
 
+# use clock_gettime() instead of gettimeofday(), which increases performance
+# dramatically on virtual machines
+# https://github.com/joyent/node/commit/f9ced08de30c37838756e8227bd091f80ad9cafa
+# see above link or head of patch for complete rationale
+Patch7:     v8-3.14.5.10-use-clock_gettime.patch
+
 
 %description
 V8 is Google's open source JavaScript engine. V8 is written in C++ and is used 
@@ -76,9 +82,17 @@ Development headers and libraries for v8.
 %patch4 -p1
 %patch5 -p1
 %patch6 -p1
+%patch7 -p1
+
+#Patch7 needs -lrt on glibc < 2.17 (RHEL <= 6)
+%if (0%{?rhel} > 6 || 0%{?fedora} > 18)
+%global lrt %{nil}
+%else
+%global lrt -lrt
+%endif
 
 # -fno-strict-aliasing is needed with gcc 4.4 to get past some ugly code
-PARSED_OPT_FLAGS=`echo \'$RPM_OPT_FLAGS -fPIC -fno-strict-aliasing -Wno-unused-parameter -Wno-error=strict-overflow -Wno-error=unused-local-typedefs -Wno-unused-but-set-variable\'| sed "s/ /',/g" | sed "s/',/', '/g"`
+PARSED_OPT_FLAGS=`echo \'$RPM_OPT_FLAGS %{lrt} -fPIC -fno-strict-aliasing -Wno-unused-parameter -Wno-error=strict-overflow -Wno-error=unused-local-typedefs -Wno-unused-but-set-variable\'| sed "s/ /',/g" | sed "s/',/', '/g"`
 sed -i "s|'-O3',|$PARSED_OPT_FLAGS,|g" SConstruct
 
 # clear spurious executable bits
@@ -233,6 +247,10 @@ rm -rf %{buildroot}
 %{python_sitelib}/j*.py*
 
 %changelog
+* Sat May 03 2014 T.C. Hollingsworth <tchollingsworth@gmail.com> - 1:3.14.5.10-8
+- use clock_gettime() instead of gettimeofday(), which increases V8 performance
+  dramatically on virtual machines
+
 * Tue Mar 18 2014 T.C. Hollingsworth <tchollingsworth@gmail.com> - 1:3.14.5.10-7
 - backport fix for unsigned integer arithmetic (RHBZ#1077136; CVE-2014-1704)
 
