@@ -23,7 +23,7 @@
 
 Name:		v8
 Version:	%{somajor}.%{sominor}.%{sobuild}.%{sotiny}
-Release:	8%{?dist}
+Release:	9%{?dist}
 Epoch:		1
 Summary:	JavaScript Engine
 Group:		System Environment/Libraries
@@ -60,6 +60,13 @@ Patch6:     v8-3.14.5.10-CVE-2014-1704-1.patch
 # see above link or head of patch for complete rationale
 Patch7:     v8-3.14.5.10-use-clock_gettime.patch
 
+# fix corner case in x64 compare stubs
+# fixes bug resulting in an incorrect result when comparing certain integers
+# (e.g. 2147483647 > -2147483648 is false instead of true)
+# https://code.google.com/p/v8/issues/detail?id=2416
+# https://github.com/joyent/node/issues/7528
+Patch8:     v8-3.14.5.10-x64-compare-stubs.patch
+
 
 %description
 V8 is Google's open source JavaScript engine. V8 is written in C++ and is used 
@@ -83,6 +90,7 @@ Development headers and libraries for v8.
 %patch5 -p1
 %patch6 -p1
 %patch7 -p1
+%patch8 -p1
 
 #Patch7 needs -lrt on glibc < 2.17 (RHEL <= 6)
 %if (0%{?rhel} > 6 || 0%{?fedora} > 18)
@@ -247,6 +255,9 @@ rm -rf %{buildroot}
 %{python_sitelib}/j*.py*
 
 %changelog
+* Thu Jun 19 2014 T.C. Hollingsworth <tchollingsworth@gmail.com> - 1:3.14.5.10-9
+- fix corner case in integer comparisons (v8 bug#2416; nodejs bug#7528)
+
 * Sat May 03 2014 T.C. Hollingsworth <tchollingsworth@gmail.com> - 1:3.14.5.10-8
 - use clock_gettime() instead of gettimeofday(), which increases V8 performance
   dramatically on virtual machines
