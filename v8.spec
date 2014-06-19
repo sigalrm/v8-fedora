@@ -23,7 +23,7 @@
 
 Name:		v8
 Version:	%{somajor}.%{sominor}.%{sobuild}.%{sotiny}
-Release:	9%{?dist}
+Release:	10%{?dist}
 Epoch:		1
 Summary:	JavaScript Engine
 Group:		System Environment/Libraries
@@ -255,8 +255,11 @@ rm -rf %{buildroot}
 %{python_sitelib}/j*.py*
 
 %changelog
-* Thu Jun 19 2014 T.C. Hollingsworth <tchollingsworth@gmail.com> - 1:3.14.5.10-9
+* Thu Jun 19 2014 T.C. Hollingsworth <tchollingsworth@gmail.com> - 1:3.14.5.10-10
 - fix corner case in integer comparisons (v8 bug#2416; nodejs bug#7528)
+
+* Sun Jun 08 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1:3.14.5.10-9
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_21_Mass_Rebuild
 
 * Sat May 03 2014 T.C. Hollingsworth <tchollingsworth@gmail.com> - 1:3.14.5.10-8
 - use clock_gettime() instead of gettimeofday(), which increases V8 performance
