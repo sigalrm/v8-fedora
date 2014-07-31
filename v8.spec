@@ -23,7 +23,7 @@
 
 Name:		v8
 Version:	%{somajor}.%{sominor}.%{sobuild}.%{sotiny}
-Release:	10%{?dist}
+Release:	11%{?dist}
 Epoch:		1
 Summary:	JavaScript Engine
 Group:		System Environment/Libraries
@@ -67,6 +67,10 @@ Patch7:     v8-3.14.5.10-use-clock_gettime.patch
 # https://github.com/joyent/node/issues/7528
 Patch8:     v8-3.14.5.10-x64-compare-stubs.patch
 
+# backport security fix for memory corruption/stack overflow (RHBZ#1125464)
+# https://groups.google.com/d/msg/nodejs/-siJEObdp10/2xcqqmTHiEMJ
+# https://github.com/joyent/node/commit/530af9cb8e700e7596b3ec812bad123c9fa06356
+Patch9:     v8-3.14.5.10-mem-corruption-stack-overflow.patch
 
 %description
 V8 is Google's open source JavaScript engine. V8 is written in C++ and is used 
@@ -91,6 +95,7 @@ Development headers and libraries for v8.
 %patch6 -p1
 %patch7 -p1
 %patch8 -p1
+%patch9 -p1
 
 #Patch7 needs -lrt on glibc < 2.17 (RHEL <= 6)
 %if (0%{?rhel} > 6 || 0%{?fedora} > 18)
@@ -255,6 +260,10 @@ rm -rf %{buildroot}
 %{python_sitelib}/j*.py*
 
 %changelog
+* Thu Jul 31 2014 T.C. Hollingsworth <tchollingsworth@gmail.com> - 1:3.14.5.10-11
+- backport security fix for memory corruption and stack overflow (RHBZ#1125464)
+  https://groups.google.com/d/msg/nodejs/-siJEObdp10/2xcqqmTHiEMJ
+
 * Thu Jun 19 2014 T.C. Hollingsworth <tchollingsworth@gmail.com> - 1:3.14.5.10-10
 - fix corner case in integer comparisons (v8 bug#2416; nodejs bug#7528)
 
