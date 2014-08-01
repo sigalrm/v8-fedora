@@ -72,6 +72,13 @@ Patch8:     v8-3.14.5.10-x64-compare-stubs.patch
 # https://github.com/joyent/node/commit/530af9cb8e700e7596b3ec812bad123c9fa06356
 Patch9:     v8-3.14.5.10-mem-corruption-stack-overflow.patch
 
+# backport bugfix for x64 MathMinMax:
+#   Fix x64 MathMinMax for negative untagged int32 arguments.
+#   An untagged int32 has zeros in the upper half even if it is negative.
+#   Using cmpq to compare such numbers will incorrectly ignore the sign.
+# https://github.com/joyent/node/commit/3530fa9cd09f8db8101c4649cab03bcdf760c434
+Patch10:    v8-3.14.5.10-x64-MathMinMax.patch
+
 %description
 V8 is Google's open source JavaScript engine. V8 is written in C++ and is used 
 in Google Chrome, the open source browser from Google. V8 implements ECMAScript 
@@ -96,6 +103,7 @@ Development headers and libraries for v8.
 %patch7 -p1
 %patch8 -p1
 %patch9 -p1
+%patch10 -p1
 
 #Patch7 needs -lrt on glibc < 2.17 (RHEL <= 6)
 %if (0%{?rhel} > 6 || 0%{?fedora} > 18)
@@ -263,6 +271,8 @@ rm -rf %{buildroot}
 * Thu Jul 31 2014 T.C. Hollingsworth <tchollingsworth@gmail.com> - 1:3.14.5.10-11
 - backport security fix for memory corruption and stack overflow (RHBZ#1125464)
   https://groups.google.com/d/msg/nodejs/-siJEObdp10/2xcqqmTHiEMJ
+- backport bug fix for x64 MathMinMax for negative untagged int32 arguments.
+  https://github.com/joyent/node/commit/3530fa9cd09f8db8101c4649cab03bcdf760c434
 
 * Thu Jun 19 2014 T.C. Hollingsworth <tchollingsworth@gmail.com> - 1:3.14.5.10-10
 - fix corner case in integer comparisons (v8 bug#2416; nodejs bug#7528)
