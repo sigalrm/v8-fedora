@@ -23,7 +23,7 @@
 
 Name:		v8
 Version:	%{somajor}.%{sominor}.%{sobuild}.%{sotiny}
-Release:	11%{?dist}
+Release:	12%{?dist}
 Epoch:		1
 Summary:	JavaScript Engine
 Group:		System Environment/Libraries
@@ -268,6 +268,9 @@ rm -rf %{buildroot}
 %{python_sitelib}/j*.py*
 
 %changelog
+* Mon Aug 18 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1:3.14.5.10-12
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_21_22_Mass_Rebuild
+
 * Thu Jul 31 2014 T.C. Hollingsworth <tchollingsworth@gmail.com> - 1:3.14.5.10-11
 - backport security fix for memory corruption and stack overflow (RHBZ#1125464)
   https://groups.google.com/d/msg/nodejs/-siJEObdp10/2xcqqmTHiEMJ
