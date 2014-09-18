@@ -23,7 +23,7 @@
 
 Name:		v8
 Version:	%{somajor}.%{sominor}.%{sobuild}.%{sotiny}
-Release:	13%{?dist}
+Release:	14%{?dist}
 Epoch:		1
 Summary:	JavaScript Engine
 Group:		System Environment/Libraries
@@ -285,11 +285,13 @@ rm -rf %{buildroot}
 %{python_sitelib}/j*.py*
 
 %changelog
-
-* Wed Sep 17 2014 T.C. Hollingsworth <tchollingsworth@gmail.com> - 1:3.14.5.10-13
+* Wed Sep 17 2014 T.C. Hollingsworth <tchollingsworth@gmail.com> - 1:3.14.5.10-14
 - backport bugfix that eliminates unused-local-typedefs warning
 - backport security fix: Fix Hydrogen bounds check elimination (CVE-2013-6668; RHBZ#1086120)
 - backport fix to segfault caused by the above patch
+
+* Tue Aug 26 2014 David Tardon <dtardon@redhat.com> - 1:3.14.5.10-13
+- rebuild for ICU 53.1
 
 * Mon Aug 18 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1:3.14.5.10-12
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_21_22_Mass_Rebuild
