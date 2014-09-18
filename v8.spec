@@ -79,6 +79,20 @@ Patch9:     v8-3.14.5.10-mem-corruption-stack-overflow.patch
 # https://github.com/joyent/node/commit/3530fa9cd09f8db8101c4649cab03bcdf760c434
 Patch10:    v8-3.14.5.10-x64-MathMinMax.patch
 
+# backport bugfix that eliminates unused-local-typedefs warning
+# https://github.com/joyent/node/commit/53b4accb6e5747b156be91a2b90f42607e33a7cc
+Patch11:    v8-3.14.5.10-unused-local-typedefs.patch
+
+# backport security fix: Fix Hydrogen bounds check elimination
+# resolves CVE-2013-6668 (RHBZ#1086120)
+# https://github.com/joyent/node/commit/fd80a31e0697d6317ce8c2d289575399f4e06d21
+Patch12:    v8-3.14.5.10-CVE-2013-6668.patch
+
+# backport fix to segfault caused by the above patch
+# https://github.com/joyent/node/commit/3122e0eae64c5ab494b29d0a9cadef902d93f1f9
+Patch13:    v8-3.14.5.10-CVE-2013-6668-segfault.patch
+
+
 %description
 V8 is Google's open source JavaScript engine. V8 is written in C++ and is used 
 in Google Chrome, the open source browser from Google. V8 implements ECMAScript 
@@ -104,6 +118,9 @@ Development headers and libraries for v8.
 %patch8 -p1
 %patch9 -p1
 %patch10 -p1
+%patch11 -p1
+%patch12 -p1
+%patch13 -p1
 
 #Patch7 needs -lrt on glibc < 2.17 (RHEL <= 6)
 %if (0%{?rhel} > 6 || 0%{?fedora} > 18)
@@ -113,7 +130,7 @@ Development headers and libraries for v8.
 %endif
 
 # -fno-strict-aliasing is needed with gcc 4.4 to get past some ugly code
-PARSED_OPT_FLAGS=`echo \'$RPM_OPT_FLAGS %{lrt} -fPIC -fno-strict-aliasing -Wno-unused-parameter -Wno-error=strict-overflow -Wno-error=unused-local-typedefs -Wno-unused-but-set-variable\'| sed "s/ /',/g" | sed "s/',/', '/g"`
+PARSED_OPT_FLAGS=`echo \'$RPM_OPT_FLAGS %{lrt} -fPIC -fno-strict-aliasing -Wno-unused-parameter -Wno-error=strict-overflow -Wno-unused-but-set-variable\'| sed "s/ /',/g" | sed "s/',/', '/g"`
 sed -i "s|'-O3',|$PARSED_OPT_FLAGS,|g" SConstruct
 
 # clear spurious executable bits
@@ -268,6 +285,11 @@ rm -rf %{buildroot}
 %{python_sitelib}/j*.py*
 
 %changelog
+* Wed Sep 17 2014 T.C. Hollingsworth <tchollingsworth@gmail.com> - 1:3.14.5.10-12
+- backport bugfix that eliminates unused-local-typedefs warning
+- backport security fix: Fix Hydrogen bounds check elimination (CVE-2013-6668; RHBZ#1086120)
+- backport fix to segfault caused by the above patch
+
 * Thu Jul 31 2014 T.C. Hollingsworth <tchollingsworth@gmail.com> - 1:3.14.5.10-11
 - backport security fix for memory corruption and stack overflow (RHBZ#1125464)
   https://groups.google.com/d/msg/nodejs/-siJEObdp10/2xcqqmTHiEMJ
