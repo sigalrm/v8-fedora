@@ -23,7 +23,7 @@
 
 Name:		v8
 Version:	%{somajor}.%{sominor}.%{sobuild}.%{sotiny}
-Release:	14%{?dist}
+Release:	15%{?dist}
 Epoch:		1
 Summary:	JavaScript Engine
 Group:		System Environment/Libraries
@@ -33,6 +33,7 @@ Source0:	http://commondatastorage.googleapis.com/chromium-browser-official/v8-%{
 BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 ExclusiveArch:	%{ix86} x86_64 %{arm}
 BuildRequires:	scons, readline-devel, libicu-devel
+BuildRequires:	valgrind-devel
 
 #backport fix for CVE-2013-2634 (RHBZ#924495)
 Patch1:		v8-3.14.5.8-CVE-2013-2634.patch
@@ -92,6 +93,9 @@ Patch12:    v8-3.14.5.10-CVE-2013-6668.patch
 # https://github.com/joyent/node/commit/3122e0eae64c5ab494b29d0a9cadef902d93f1f9
 Patch13:    v8-3.14.5.10-CVE-2013-6668-segfault.patch
 
+# Use system valgrind header
+# https://bugzilla.redhat.com/show_bug.cgi?id=1141483
+Patch14:    v8-3.14.5.10-system-valgrind.patch
 
 %description
 V8 is Google's open source JavaScript engine. V8 is written in C++ and is used 
@@ -121,6 +125,10 @@ Development headers and libraries for v8.
 %patch11 -p1
 %patch12 -p1
 %patch13 -p1
+%patch14 -p1 -b .system-valgrind
+
+# Do not need this lying about.
+rm -rf src/third_party/valgrind
 
 #Patch7 needs -lrt on glibc < 2.17 (RHEL <= 6)
 %if (0%{?rhel} > 6 || 0%{?fedora} > 18)
@@ -285,6 +293,9 @@ rm -rf %{buildroot}
 %{python_sitelib}/j*.py*
 
 %changelog
+* Tue Dec  2 2014 Tom Callaway <spot@fedoraproject.org> - 1:3.14.5.10-15
+- use system valgrind header (bz1141483)
+
 * Wed Sep 17 2014 T.C. Hollingsworth <tchollingsworth@gmail.com> - 1:3.14.5.10-14
 - backport bugfix that eliminates unused-local-typedefs warning
 - backport security fix: Fix Hydrogen bounds check elimination (CVE-2013-6668; RHBZ#1086120)
