@@ -23,7 +23,7 @@
 
 Name:		v8
 Version:	%{somajor}.%{sominor}.%{sobuild}.%{sotiny}
-Release:	15%{?dist}
+Release:	16%{?dist}
 Epoch:		1
 Summary:	JavaScript Engine
 Group:		System Environment/Libraries
@@ -293,6 +293,9 @@ rm -rf %{buildroot}
 %{python_sitelib}/j*.py*
 
 %changelog
+* Mon Jan 26 2015 David Tardon <dtardon@redhat.com> - 1:3.14.5.10-16
+- rebuild for ICU 54.1
+
 * Tue Dec  2 2014 Tom Callaway <spot@fedoraproject.org> - 1:3.14.5.10-15
 - use system valgrind header (bz1141483)
 
