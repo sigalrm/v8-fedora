@@ -23,7 +23,7 @@
 
 Name:		v8
 Version:	%{somajor}.%{sominor}.%{sobuild}.%{sotiny}
-Release:	16%{?dist}
+Release:	17%{?dist}
 Epoch:		1
 Summary:	JavaScript Engine
 Group:		System Environment/Libraries
@@ -97,6 +97,27 @@ Patch13:    v8-3.14.5.10-CVE-2013-6668-segfault.patch
 # https://bugzilla.redhat.com/show_bug.cgi?id=1141483
 Patch14:    v8-3.14.5.10-system-valgrind.patch
 
+# Fix issues with abort on uncaught exception
+# https://github.com/joyent/node/pull/8666
+# https://github.com/joyent/node/issues/8631
+# https://github.com/joyent/node/issues/8630
+Patch15:    v8-3.14.5.10-abort-uncaught-exception.patch
+
+# Fix unhandled ReferenceError in debug-debugger.js
+# https://github.com/joyent/node/commit/0ff51c6e063e3eea9e4d9ea68edc82d935626fc7
+# https://codereview.chromium.org/741683002
+Patch16:    v8-3.14.5.10-unhandled-ReferenceError.patch
+
+# Don't busy loop in CPU profiler thread
+# https://github.com/joyent/node/pull/8789
+Patch17:    v8-3.14.5.10-busy-loop.patch
+
+# Log V8 version in profiler log file
+# (needed for compatibility with profiler tools)
+# https://github.com/joyent/node/pull/9043
+# https://codereview.chromium.org/806143002
+Patch18:    v8-3.14.5.10-profiler-log.patch
+
 %description
 V8 is Google's open source JavaScript engine. V8 is written in C++ and is used 
 in Google Chrome, the open source browser from Google. V8 implements ECMAScript 
@@ -126,6 +147,10 @@ Development headers and libraries for v8.
 %patch12 -p1
 %patch13 -p1
 %patch14 -p1 -b .system-valgrind
+%patch15 -p1 -b .abort-uncaught-exception
+%patch16 -p1 -b .unhandled-ReferenceError
+%patch17 -p1 -b .busy-loop
+%patch18 -p1 -b .profiler-log
 
 # Do not need this lying about.
 rm -rf src/third_party/valgrind
@@ -293,6 +318,9 @@ rm -rf %{buildroot}
 %{python_sitelib}/j*.py*
 
 %changelog
+* Thu Feb 19 2015 T.C. Hollingsworth <tchollingsworth@gmail.com> - 1:3.14.5.10-17
+- backports for nodejs 0.10.36
+
 * Mon Jan 26 2015 David Tardon <dtardon@redhat.com> - 1:3.14.5.10-16
 - rebuild for ICU 54.1
 
