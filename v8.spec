@@ -23,7 +23,7 @@
 
 Name:		v8
 Version:	%{somajor}.%{sominor}.%{sobuild}.%{sotiny}
-Release:	17%{?dist}
+Release:	18%{?dist}
 Epoch:		1
 Summary:	JavaScript Engine
 Group:		System Environment/Libraries
@@ -118,6 +118,11 @@ Patch17:    v8-3.14.5.10-busy-loop.patch
 # https://codereview.chromium.org/806143002
 Patch18:    v8-3.14.5.10-profiler-log.patch
 
+# Fix CVE in ARM code
+# https://bugzilla.redhat.com/show_bug.cgi?id=1101057
+# https://codereview.chromium.org/219473002
+Patch19:    v8-3.4.14-CVE-2014-3152.patch
+
 %description
 V8 is Google's open source JavaScript engine. V8 is written in C++ and is used 
 in Google Chrome, the open source browser from Google. V8 implements ECMAScript 
@@ -151,6 +156,7 @@ Development headers and libraries for v8.
 %patch16 -p1 -b .unhandled-ReferenceError
 %patch17 -p1 -b .busy-loop
 %patch18 -p1 -b .profiler-log
+%patch19 -p1 -b .cve20143152
 
 # Do not need this lying about.
 rm -rf src/third_party/valgrind
@@ -318,6 +324,9 @@ rm -rf %{buildroot}
 %{python_sitelib}/j*.py*
 
 %changelog
+* Thu Apr 23 2015 Tom Callaway <spot@fedoraproject.org> - 1:3.14.5.10-18
+- backport security fix for ARM - CVE-2014-3152
+
 * Thu Feb 19 2015 T.C. Hollingsworth <tchollingsworth@gmail.com> - 1:3.14.5.10-17
 - backports for nodejs 0.10.36
 
