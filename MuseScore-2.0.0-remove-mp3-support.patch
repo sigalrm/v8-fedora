@@ -1,0 +1,71 @@
+diff -uNr MuseScore-2.0.0/CMakeLists.txt MuseScore-2.0.0.lame/CMakeLists.txt
+--- MuseScore-2.0.0/CMakeLists.txt	2015-04-25 17:25:27.105930823 +0300
++++ MuseScore-2.0.0.lame/CMakeLists.txt	2015-04-25 17:07:45.879356577 +0300
+@@ -44,7 +44,6 @@
+ include (UsePkgConfig1)
+ include (TargetDoc)
+ include (FindPulseAudio)
+-include (FindLame)
+ include (GetCompilerVersion)
+ include (CreatePrecompiledHeader)
+ 
+@@ -436,7 +435,6 @@
+    ${OGG_INCDIR}
+    ${VORBIS_INCDIR}
+    ${SNDFILE_INCDIR}
+-   ${LAME_INCLUDE_DIR}
+ )
+ 
+ ##
+diff -uNr MuseScore-2.0.0/mscore/CMakeLists.txt MuseScore-2.0.0.lame/mscore/CMakeLists.txt
+--- MuseScore-2.0.0/mscore/CMakeLists.txt	2015-04-25 17:25:27.093930461 +0300
++++ MuseScore-2.0.0.lame/mscore/CMakeLists.txt	2015-04-25 17:07:32.514973070 +0300
+@@ -226,7 +226,7 @@
+       importgtp.cpp importgtp-gp4.cpp importgtp-gp5.cpp importgtp-gp6.cpp fotomode.cpp drumtools.cpp
+       selinstrument.cpp texteditor.cpp editstafftype.cpp texttools.cpp
+       editpitch.cpp editstringdata.cpp editraster.cpp pianotools.cpp mediadialog.cpp
+-      workspace.cpp exportmp3.cpp chordview.cpp
++      workspace.cpp chordview.cpp
+       album.cpp albummanager.cpp
+       textstyle.cpp
+       lineproperties.cpp stafftextproperties.cpp splitstaff.cpp
+diff -uNr MuseScore-2.0.0/mscore/file.cpp MuseScore-2.0.0.lame/mscore/file.cpp
+--- MuseScore-2.0.0/mscore/file.cpp	2015-03-21 10:32:54.000000000 +0300
++++ MuseScore-2.0.0.lame/mscore/file.cpp	2015-04-25 17:24:16.761808110 +0300
+@@ -1537,7 +1537,6 @@
+       fl.append(tr("FLAC Audio (*.flac)"));
+       fl.append(tr("Ogg Vorbis Audio (*.ogg)"));
+ #endif
+-      fl.append(tr("MP3 Audio (*.mp3)"));
+       fl.append(tr("Standard MIDI File (*.mid)"));
+       fl.append(tr("MusicXML File (*.xml)"));
+       fl.append(tr("Compressed MusicXML File (*.mxl)"));
+@@ -1601,7 +1600,6 @@
+       fl.append(tr("FLAC Audio (*.flac)"));
+       fl.append(tr("Ogg Vorbis Audio (*.ogg)"));
+ #endif
+-      fl.append(tr("MP3 Audio (*.mp3)"));
+       fl.append(tr("Standard MIDI File (*.mid)"));
+       fl.append(tr("MusicXML File (*.xml)"));
+       fl.append(tr("Compressed MusicXML File (*.mxl)"));
+@@ -1797,8 +1795,6 @@
+       else if (ext == "wav" || ext == "flac" || ext == "ogg")
+             rv = saveAudio(cs, fn);
+ #endif
+-      else if (ext == "mp3")
+-            rv = saveMp3(cs, fn);
+       else if (ext == "spos") {
+             // save positions of segments
+             rv = savePositions(cs, fn, true);
+diff -uNr MuseScore-2.0.0/mscore/musescore.cpp MuseScore-2.0.0.lame/mscore/musescore.cpp
+--- MuseScore-2.0.0/mscore/musescore.cpp	2015-03-21 10:32:54.000000000 +0300
++++ MuseScore-2.0.0.lame/mscore/musescore.cpp	2015-04-25 17:22:52.616268923 +0300
+@@ -2140,8 +2140,6 @@
+             if (fn.endsWith(".wav") || fn.endsWith(".ogg") || fn.endsWith(".flac"))
+                   return mscore->saveAudio(cs, fn);
+ #endif
+-            if (fn.endsWith(".mp3"))
+-                  return mscore->saveMp3(cs, fn);
+             if (fn.endsWith(".spos"))
+                   return savePositions(cs, fn, true);
+             if (fn.endsWith(".mpos"))
