@@ -23,7 +23,7 @@
 
 Name:		v8
 Version:	%{somajor}.%{sominor}.%{sobuild}.%{sotiny}
-Release:	18%{?dist}
+Release:	19%{?dist}
 Epoch:		1
 Summary:	JavaScript Engine
 Group:		System Environment/Libraries
@@ -135,6 +135,13 @@ Requires:	%{name} = %{epoch}:%{version}-%{release}
 
 %description devel
 Development headers and libraries for v8.
+
+%package python
+Summary:	Python libraries from v8
+Requires:	%{name} = %{epoch}:%{version}-%{release}
+
+%description python
+Python libraries from v8.
 
 %prep
 %setup -q -n %{name}-%{version}
@@ -321,9 +328,14 @@ rm -rf %{buildroot}
 %dir %{_includedir}/v8/
 %{_includedir}/v8/extensions/
 %{_libdir}/*.so
+
+%files python
 %{python_sitelib}/j*.py*
 
 %changelog
+* Mon Jun  8 2015 Tom Callaway <spot@fedoraproject.org> - 1:3.14.5.10-19
+- split off python subpackage (bz 959145)
+
 * Thu Apr 23 2015 Tom Callaway <spot@fedoraproject.org> - 1:3.14.5.10-18
 - backport security fix for ARM - CVE-2014-3152
 
