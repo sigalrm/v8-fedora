@@ -23,7 +23,7 @@
 
 Name:		v8
 Version:	%{somajor}.%{sominor}.%{sobuild}.%{sotiny}
-Release:	20%{?dist}
+Release:	21%{?dist}
 Epoch:		1
 Summary:	JavaScript Engine
 Group:		System Environment/Libraries
@@ -123,6 +123,9 @@ Patch18:    v8-3.14.5.10-profiler-log.patch
 # https://codereview.chromium.org/219473002
 Patch19:    v8-3.4.14-CVE-2014-3152.patch
 
+# Add REPLACE_INVALID_UTF8 handling that nodejs needs
+Patch20:    v8-3.14.5.10-REPLACE_INVALID_UTF8.patch
+
 %description
 V8 is Google's open source JavaScript engine. V8 is written in C++ and is used 
 in Google Chrome, the open source browser from Google. V8 implements ECMAScript 
@@ -164,6 +167,7 @@ Python libraries from v8.
 %patch17 -p1 -b .busy-loop
 %patch18 -p1 -b .profiler-log
 %patch19 -p1 -b .cve20143152
+%patch20 -p1 -b .riu
 
 # Do not need this lying about.
 rm -rf src/third_party/valgrind
@@ -333,6 +337,9 @@ rm -rf %{buildroot}
 %{python_sitelib}/j*.py*
 
 %changelog
+* Mon Sep 21 2015 Tom Callaway <spot@fedoraproject.org> - 1:3.14.5.10-21
+- add REPLACE_INVALID_UTF8 code needed for nodejs
+
 * Fri Jun 19 2015 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1:3.14.5.10-20
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_23_Mass_Rebuild
 
