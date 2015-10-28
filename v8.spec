@@ -23,7 +23,7 @@
 
 Name:		v8
 Version:	%{somajor}.%{sominor}.%{sobuild}.%{sotiny}
-Release:	21%{?dist}
+Release:	22%{?dist}
 Epoch:		1
 Summary:	JavaScript Engine
 Group:		System Environment/Libraries
@@ -337,6 +337,9 @@ rm -rf %{buildroot}
 %{python_sitelib}/j*.py*
 
 %changelog
+* Wed Oct 28 2015 David Tardon <dtardon@redhat.com> - 1:3.14.5.10-22
+- rebuild for ICU 56.1
+
 * Mon Sep 21 2015 Tom Callaway <spot@fedoraproject.org> - 1:3.14.5.10-21
 - add REPLACE_INVALID_UTF8 code needed for nodejs
 
