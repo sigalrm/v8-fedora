@@ -1,0 +1,27 @@
+diff -up v8-5.2.197/test/cctest/interpreter/generate-bytecode-expectations.cc.readdir v8-5.2.197/test/cctest/interpreter/generate-bytecode-expectations.cc
+--- v8-5.2.197/test/cctest/interpreter/generate-bytecode-expectations.cc.readdir	2016-05-02 09:47:32.000000000 -0400
++++ v8-5.2.197/test/cctest/interpreter/generate-bytecode-expectations.cc	2016-05-02 15:42:49.961046560 -0400
+@@ -20,6 +20,8 @@
+ #include <dirent.h>
+ #endif
+ 
++#include <errno.h>
++
+ using v8::internal::interpreter::BytecodeExpectationsPrinter;
+ 
+ #define REPORT_ERROR(MESSAGE) (((std::cerr << "ERROR: ") << MESSAGE) << '\n')
+@@ -174,10 +176,12 @@ bool CollectGoldenFiles(std::vector<std:
+   DIR* directory = opendir(directory_path);
+   if (!directory) return false;
+ 
+-  dirent entry_buffer;
+   dirent* entry;
+ 
+-  while (readdir_r(directory, &entry_buffer, &entry) == 0 && entry) {
++  errno = 0;
++  entry = readdir(directory);
++
++  while (errno != 0) {
+     if (StrEndsWith(entry->d_name, ".golden")) {
+       std::string golden_filename(kGoldenFilesPath);
+       golden_filename += entry->d_name;
