@@ -1,3 +1,6 @@
+# clang doesn't understand hardening, specifically "-specs="
+%global clang_optflags %(echo %{optflags} | sed 's|-specs=/usr/lib/rpm/redhat/redhat-hardened-cc1 ||g')
+
 # Hi Googlers! If you're looking in here for patches, nifty.
 # You (and everyone else) are welcome to use any of my Chromium spec files and
 # patches under the terms of the GPLv2 or later.
@@ -21,7 +24,7 @@
 
 Name:		v8
 Version:	%{somajor}.%{sominor}.%{sobuild}
-Release:	1%{?dist}
+Release:	2%{?dist}
 Epoch:		1
 Summary:	JavaScript Engine
 Group:		System Environment/Libraries
@@ -144,6 +147,8 @@ soname_version=%{somajor} \
 snapshot=off \
 CC=%{_bindir}/clang \
 CXX=%{_bindir}/clang++ \
+CFLAGS="%{clang_optflags}" \
+CXXFLAGS="%{clang_optflags}" \
 V=1 \
 library=shared %{?_smp_mflags}
 
@@ -202,6 +207,9 @@ chmod -R -x %{buildroot}%{python_sitelib}/*.py*
 %{python_sitelib}/j*.py*
 
 %changelog
+* Fri May 13 2016 Tom Callaway <spot@fedoraproject.org> - 1:5.2.258-2
+- build with optflags, except for the hardening script which clang has no idea what to do with
+
 * Mon May  9 2016 Tom Callaway <spot@fedoraproject.org> - 1:5.2.258-1
 - update to 5.2.258
 
