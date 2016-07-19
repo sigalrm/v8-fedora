@@ -24,7 +24,7 @@
 
 Name:		v8
 Version:	%{somajor}.%{sominor}.%{sobuild}
-Release:	2%{?dist}
+Release:	3%{?dist}
 Epoch:		1
 Summary:	JavaScript Engine
 Group:		System Environment/Libraries
@@ -207,6 +207,9 @@ chmod -R -x %{buildroot}%{python_sitelib}/*.py*
 %{python_sitelib}/j*.py*
 
 %changelog
+* Tue Jul 19 2016 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1:5.2.258-3
+- https://fedoraproject.org/wiki/Changes/Automatic_Provides_for_Python_RPM_Packages
+
 * Fri May 13 2016 Tom Callaway <spot@fedoraproject.org> - 1:5.2.258-2
 - build with optflags, except for the hardening script which clang has no idea what to do with
 
