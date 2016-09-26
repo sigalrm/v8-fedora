@@ -1,5 +1,5 @@
 # clang doesn't understand hardening, specifically "-specs="
-%global clang_optflags %(echo %{optflags} | sed 's|-specs=/usr/lib/rpm/redhat/redhat-hardened-cc1 ||g')
+%global clang_optflags %(echo %{optflags} | sed 's|-specs=/usr/lib/rpm/redhat/redhat-hardened-cc1||g')
 
 # Hi Googlers! If you're looking in here for patches, nifty.
 # You (and everyone else) are welcome to use any of my Chromium spec files and
