@@ -24,7 +24,7 @@
 
 Name:		v8
 Version:	%{somajor}.%{sominor}.%{sobuild}
-Release:	3%{?dist}
+Release:	4%{?dist}
 Epoch:		1
 Summary:	JavaScript Engine
 Group:		System Environment/Libraries
@@ -144,7 +144,7 @@ armfloatabi=softfp \
 %endif
 system_icu=on \
 soname_version=%{somajor} \
-snapshot=off \
+snapshot=external \
 CC=%{_bindir}/clang \
 CXX=%{_bindir}/clang++ \
 CFLAGS="%{clang_optflags}" \
@@ -157,12 +157,17 @@ pushd out/%{v8arch}.release
 # library first
 mkdir -p %{buildroot}%{_libdir}
 cp -a lib.target/libv8.so.%{somajor} %{buildroot}%{_libdir}
+# Now, the static libraries that some/most/all v8 applications also need to link against.
+cp -a obj.target/src/libv8/libv8*.a %{buildroot}%{_libdir}
 # Next, binaries
 mkdir -p %{buildroot}%{_bindir}
 install -p -m0755 d8 %{buildroot}%{_bindir}
 # install -p -m0755 mksnapshot %{buildroot}%{_bindir}
 install -p -m0755 parser_fuzzer %{buildroot}%{_bindir}
 popd
+# BLOBS! (Don't stress. They get built out of source code.)
+install -p natives_blob.bin snapshot_blob.bin %{buildroot}%{_libdir}
+
 # Now, headers
 mkdir -p %{buildroot}%{_includedir}
 install -p include/*.h %{buildroot}%{_includedir}
@@ -195,6 +200,7 @@ chmod -R -x %{buildroot}%{python_sitelib}/*.py*
 # %%{_bindir}/mksnapshot
 %{_bindir}/parser_fuzzer
 %{_libdir}/*.so.*
+%{_libdir}/*.bin
 
 %files devel
 %{_includedir}/*.h
@@ -202,11 +208,16 @@ chmod -R -x %{buildroot}%{python_sitelib}/*.py*
 %dir %{_includedir}/v8/
 %{_includedir}/v8/extensions/
 %{_libdir}/*.so
+%{_libdir}/*.a
 
 %files python
 %{python_sitelib}/j*.py*
 
 %changelog
+* Mon Sep 26 2016 Tom Callaway <spot@fedoraproject.org> - 1:5.2.258-4
+- set snapshot=external to enable blob creation
+- include blobs, static libraries
+
 * Tue Jul 19 2016 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1:5.2.258-3
 - https://fedoraproject.org/wiki/Changes/Automatic_Provides_for_Python_RPM_Packages
 
