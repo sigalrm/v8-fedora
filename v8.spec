@@ -158,7 +158,7 @@ pushd out/%{v8arch}.release
 mkdir -p %{buildroot}%{_libdir}
 cp -a lib.target/libv8.so.%{somajor} %{buildroot}%{_libdir}
 # Now, the static libraries that some/most/all v8 applications also need to link against.
-cp -a obj.target/src/libv8/libv8*.a %{buildroot}%{_libdir}
+cp -a obj.target/src/libv8_*.a %{buildroot}%{_libdir}
 # Next, binaries
 mkdir -p %{buildroot}%{_bindir}
 install -p -m0755 d8 %{buildroot}%{_bindir}
