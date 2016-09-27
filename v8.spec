@@ -164,9 +164,9 @@ mkdir -p %{buildroot}%{_bindir}
 install -p -m0755 d8 %{buildroot}%{_bindir}
 # install -p -m0755 mksnapshot %{buildroot}%{_bindir}
 install -p -m0755 parser_fuzzer %{buildroot}%{_bindir}
-popd
 # BLOBS! (Don't stress. They get built out of source code.)
 install -p natives_blob.bin snapshot_blob.bin %{buildroot}%{_libdir}
+popd
 
 # Now, headers
 mkdir -p %{buildroot}%{_includedir}
