@@ -24,7 +24,7 @@
 
 Name:		v8
 Version:	%{somajor}.%{sominor}.%{sobuild}
-Release:	4%{?dist}
+Release:	5%{?dist}
 Epoch:		1
 Summary:	JavaScript Engine
 Group:		System Environment/Libraries
@@ -45,6 +45,7 @@ URL:		https://chromium.googlesource.com/v8/v8/
 Source0:	v8-5.2.258.tar.bz2
 Patch0:		v8-4.10.91-system_icu.patch
 Patch1:		v8-5.2.197-readdir-fix.patch
+Patch2:		v8-5.2.258-bundled-binutils.patch
 # arm is excluded because of bz1334406
 ExclusiveArch:	%{ix86} x86_64 ppc ppc64 aarch64 %{mips} s390 s390x
 BuildRequires:	readline-devel, libicu-devel
@@ -75,6 +76,7 @@ Python libraries from v8.
 %setup -q -n %{name}-%{version}
 %patch0 -p1 -b .system_icu
 %patch1 -p1 -b .readdir
+%patch2 -p1 -b .bb
 
 # Use system header ... except it doesn't work.
 # rm -rf src/third_party/valgrind/valgrind.h
@@ -145,12 +147,13 @@ armfloatabi=softfp \
 system_icu=on \
 soname_version=%{somajor} \
 snapshot=external \
+library=shared %{?_smp_mflags} \
+bundledbinutils=off \
 CC=%{_bindir}/clang \
 CXX=%{_bindir}/clang++ \
 CFLAGS="%{clang_optflags}" \
 CXXFLAGS="%{clang_optflags}" \
-V=1 \
-library=shared %{?_smp_mflags}
+V=1
 
 %install
 pushd out/%{v8arch}.release
@@ -214,6 +217,9 @@ chmod -R -x %{buildroot}%{python_sitelib}/*.py*
 %{python_sitelib}/j*.py*
 
 %changelog
+* Mon Oct 10 2016 Tom Callaway <spot@fedoraproject.org> - 1:5.2.258-5
+- add bundledbinutils option to Makefile to disable "thin" static libs
+
 * Mon Sep 26 2016 Tom Callaway <spot@fedoraproject.org> - 1:5.2.258-4
 - set snapshot=external to enable blob creation
 - include blobs, static libraries
