@@ -24,7 +24,7 @@
 
 Name:		v8
 Version:	%{somajor}.%{sominor}.%{sobuild}
-Release:	5%{?dist}
+Release:	6%{?dist}
 Epoch:		1
 Summary:	JavaScript Engine
 Group:		System Environment/Libraries
@@ -41,8 +41,8 @@ URL:		https://chromium.googlesource.com/v8/v8/
 # gclient sync
 # cd ..
 # mv v8 v8-5.2.258
-# tar cfj v8-5.2.258.tar.bz2 v8-5.2.258
-Source0:	v8-5.2.258.tar.bz2
+# tar -c  --exclude=.git --exclude=build/linux -J -f v8-5.2.258.tar.xz v8-5.2.258
+Source0:	v8-5.2.258.tar.xz
 Patch0:		v8-4.10.91-system_icu.patch
 Patch1:		v8-5.2.197-readdir-fix.patch
 Patch2:		v8-5.2.258-bundled-binutils.patch
@@ -217,6 +217,9 @@ chmod -R -x %{buildroot}%{python_sitelib}/*.py*
 %{python_sitelib}/j*.py*
 
 %changelog
+* Thu Oct 13 2016 Tom Callaway <spot@fedoraproject.org> - 1:5.2.258-6
+- use smaller, better compressed source tarball without unnecessary git bits
+
 * Mon Oct 10 2016 Tom Callaway <spot@fedoraproject.org> - 1:5.2.258-5
 - add bundledbinutils option to Makefile to disable "thin" static libs
 
