@@ -24,7 +24,7 @@
 
 Name:		v8
 Version:	%{somajor}.%{sominor}.%{sobuild}
-Release:	6%{?dist}
+Release:	7%{?dist}
 Epoch:		1
 Summary:	JavaScript Engine
 Group:		System Environment/Libraries
@@ -81,6 +81,14 @@ Python libraries from v8.
 # Use system header ... except it doesn't work.
 # rm -rf src/third_party/valgrind/valgrind.h
 # ln -s /usr/include/valgrind/valgrind.h src/third_party/valgrind/valgrind.h
+
+# Don't make thin libraries. :(
+for i in `find . -type f -name '*.mk'`; do sed -i 's|alink_thin|alink|g' $i; done
+sed -i "s|'alink_thin'|'alink'|g" tools/gyp/pylib/gyp/generator/make.py
+sed -i "s|'alink_thin'|'alink'|g" tools/gyp/pylib/gyp/generator/ninja.py
+sed -i "s|crsT|crs|g" out/Makefile
+sed -i "s|crsT|crs|g" tools/gyp/pylib/gyp/generator/make.py
+
 
 # What? *sigh*
 rm -rf third_party/binutils/Linux_x64/Release/bin/ld.gold
@@ -217,6 +225,9 @@ chmod -R -x %{buildroot}%{python_sitelib}/*.py*
 %{python_sitelib}/j*.py*
 
 %changelog
+* Mon Oct 17 2016 Tom Callaway <spot@fedoraproject.org> - 1:5.2.258-7
+- force v8 not to make thin libraries
+
 * Thu Oct 13 2016 Tom Callaway <spot@fedoraproject.org> - 1:5.2.258-6
 - use smaller, better compressed source tarball without unnecessary git bits
 
