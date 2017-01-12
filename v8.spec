@@ -24,7 +24,7 @@
 
 Name:		v8
 Version:	%{somajor}.%{sominor}.%{sobuild}
-Release:	7%{?dist}
+Release:	8%{?dist}
 Epoch:		1
 Summary:	JavaScript Engine
 Group:		System Environment/Libraries
@@ -225,6 +225,9 @@ chmod -R -x %{buildroot}%{python_sitelib}/*.py*
 %{python_sitelib}/j*.py*
 
 %changelog
+* Thu Jan 12 2017 Igor Gnatenko <ignatenko@redhat.com> - 1:5.2.258-8
+- Rebuild for readline 7.x
+
 * Mon Oct 17 2016 Tom Callaway <spot@fedoraproject.org> - 1:5.2.258-7
 - force v8 not to make thin libraries
 
