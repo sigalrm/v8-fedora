@@ -1,5 +1,6 @@
 # clang doesn't understand hardening, specifically "-specs="
 %global clang_optflags %(echo %{optflags} | sed 's|-specs=/usr/lib/rpm/redhat/redhat-hardened-cc1||g')
+%global clang_ldflags %(echo "%{__global_ldflags} -Wl,--build-id" | sed 's|-specs=/usr/lib/rpm/redhat/redhat-hardened-ld||g')
 
 # Hi Googlers! If you're looking in here for patches, nifty.
 # You (and everyone else) are welcome to use any of my Chromium spec files and
@@ -24,7 +25,7 @@
 
 Name:		v8
 Version:	%{somajor}.%{sominor}.%{sobuild}
-Release:	9%{?dist}
+Release:	10%{?dist}
 Epoch:		1
 Summary:	JavaScript Engine
 Group:		System Environment/Libraries
@@ -46,6 +47,7 @@ Source0:	v8-5.2.258.tar.xz
 Patch0:		v8-4.10.91-system_icu.patch
 Patch1:		v8-5.2.197-readdir-fix.patch
 Patch2:		v8-5.2.258-bundled-binutils.patch
+Patch3:		v8-5.2.258-gcc7.patch
 # arm is excluded because of bz1334406
 ExclusiveArch:	%{ix86} x86_64 ppc ppc64 aarch64 %{mips} s390 s390x
 BuildRequires:	readline-devel, libicu-devel
@@ -77,6 +79,7 @@ Python libraries from v8.
 %patch0 -p1 -b .system_icu
 %patch1 -p1 -b .readdir
 %patch2 -p1 -b .bb
+%patch3 -p1 -b .gcc7
 
 # Use system header ... except it doesn't work.
 # rm -rf src/third_party/valgrind/valgrind.h
@@ -161,6 +164,7 @@ CC=%{_bindir}/clang \
 CXX=%{_bindir}/clang++ \
 CFLAGS="%{clang_optflags}" \
 CXXFLAGS="%{clang_optflags}" \
+LDFLAGS="%{clang_ldflags}" \
 V=1
 
 %install
@@ -225,6 +229,9 @@ chmod -R -x %{buildroot}%{python_sitelib}/*.py*
 %{python_sitelib}/j*.py*
 
 %changelog
+* Tue Feb 28 2017 Tom Callaway <spot@fedoraproject.org> - 1:5.2.258-10
+- fix ftbfs (thanks to Ben Noordhuis)
+
 * Sat Feb 11 2017 Fedora Release Engineering <releng@fedoraproject.org> - 1:5.2.258-9
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_26_Mass_Rebuild
 

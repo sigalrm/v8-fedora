@@ -1,0 +1,119 @@
+diff -up v8-5.2.258/samples/shell.cc.gcc7 v8-5.2.258/samples/shell.cc
+--- v8-5.2.258/samples/shell.cc.gcc7	2017-02-28 15:33:38.931424708 -0500
++++ v8-5.2.258/samples/shell.cc	2017-02-28 15:34:00.759853299 -0500
+@@ -361,6 +361,8 @@ bool ExecuteString(v8::Isolate* isolate,
+   } else {
+     v8::Local<v8::Value> result;
+     if (!script->Run(context).ToLocal(&result)) {
++#pragma GCC diagnostic push
++#pragma GCC diagnostic ignored "-Wgnu"
+       assert(try_catch.HasCaught());
+       // Print errors that happened during execution.
+       if (report_exceptions)
+@@ -368,6 +370,7 @@ bool ExecuteString(v8::Isolate* isolate,
+       return false;
+     } else {
+       assert(!try_catch.HasCaught());
++#pragma GCC diagnostic pop
+       if (print_result && !result->IsUndefined()) {
+         // If all went well and the result wasn't undefined then print
+         // the returned value.
+diff -up v8-5.2.258/src/crankshaft/lithium.cc.gcc7 v8-5.2.258/src/crankshaft/lithium.cc
+--- v8-5.2.258/src/crankshaft/lithium.cc.gcc7	2016-05-09 10:28:43.000000000 -0400
++++ v8-5.2.258/src/crankshaft/lithium.cc	2017-02-28 14:42:17.188361709 -0500
+@@ -128,11 +128,6 @@ void LOperand::PrintTo(StringStream* str
+ 
+ 
+ template<LOperand::Kind kOperandKind, int kNumCachedOperands>
+-LSubKindOperand<kOperandKind, kNumCachedOperands>*
+-LSubKindOperand<kOperandKind, kNumCachedOperands>::cache = NULL;
+-
+-
+-template<LOperand::Kind kOperandKind, int kNumCachedOperands>
+ void LSubKindOperand<kOperandKind, kNumCachedOperands>::SetUpCache() {
+   if (cache) return;
+   cache = new LSubKindOperand[kNumCachedOperands];
+diff -up v8-5.2.258/src/crankshaft/lithium.h.gcc7 v8-5.2.258/src/crankshaft/lithium.h
+--- v8-5.2.258/src/crankshaft/lithium.h.gcc7	2016-05-09 10:28:43.000000000 -0400
++++ v8-5.2.258/src/crankshaft/lithium.h	2017-02-28 14:42:17.188361709 -0500
+@@ -338,6 +338,9 @@ class LSubKindOperand final : public LOp
+   explicit LSubKindOperand(int index) : LOperand(kOperandKind, index) { }
+ };
+ 
++template<LOperand::Kind kOperandKind, int kNumCachedOperands>
++LSubKindOperand<kOperandKind, kNumCachedOperands>*
++LSubKindOperand<kOperandKind, kNumCachedOperands>::cache = NULL;
+ 
+ #define LITHIUM_TYPEDEF_SUBKIND_OPERAND_CLASS(name, type, number)   \
+ typedef LSubKindOperand<LOperand::type, number> L##name;
+diff -up v8-5.2.258/src/objects-body-descriptors.h.gcc7 v8-5.2.258/src/objects-body-descriptors.h
+--- v8-5.2.258/src/objects-body-descriptors.h.gcc7	2016-05-09 10:28:43.000000000 -0400
++++ v8-5.2.258/src/objects-body-descriptors.h	2017-02-28 14:42:17.189361685 -0500
+@@ -99,7 +99,7 @@ class FixedBodyDescriptor final : public
+ 
+   template <typename StaticVisitor>
+   static inline void IterateBody(HeapObject* obj, int object_size) {
+-    IterateBody(obj);
++    IterateBody<StaticVisitor>(obj);
+   }
+ };
+ 
+diff -up v8-5.2.258/src/objects.h.gcc7 v8-5.2.258/src/objects.h
+--- v8-5.2.258/src/objects.h.gcc7	2016-05-09 10:28:43.000000000 -0400
++++ v8-5.2.258/src/objects.h	2017-02-28 14:42:17.190361661 -0500
+@@ -3182,22 +3182,10 @@ class HashTableBase : public FixedArray
+ template <typename Derived, typename Shape, typename Key>
+ class HashTable : public HashTableBase {
+  public:
+-  // Wrapper methods
+-  inline uint32_t Hash(Key key) {
+-    if (Shape::UsesSeed) {
+-      return Shape::SeededHash(key, GetHeap()->HashSeed());
+-    } else {
+-      return Shape::Hash(key);
+-    }
+-  }
+-
+-  inline uint32_t HashForObject(Key key, Object* object) {
+-    if (Shape::UsesSeed) {
+-      return Shape::SeededHashForObject(key, GetHeap()->HashSeed(), object);
+-    } else {
+-      return Shape::HashForObject(key, object);
+-    }
+-  }
++  // Wrapper methods.  Defined in src/objects-inl.h
++  // to break a cycle with src/heap/heap.h.
++  inline uint32_t Hash(Key key);
++  inline uint32_t HashForObject(Key key, Object* object);
+ 
+   // Returns a new HashTable object.
+   MUST_USE_RESULT static Handle<Derived> New(
+diff -up v8-5.2.258/src/objects-inl.h.gcc7 v8-5.2.258/src/objects-inl.h
+--- v8-5.2.258/src/objects-inl.h.gcc7	2016-05-09 10:28:43.000000000 -0400
++++ v8-5.2.258/src/objects-inl.h	2017-02-28 14:42:17.191361638 -0500
+@@ -35,6 +35,25 @@
+ namespace v8 {
+ namespace internal {
+ 
++template <typename Derived, typename Shape, typename Key>
++uint32_t HashTable<Derived, Shape, Key>::Hash(Key key) {
++  if (Shape::UsesSeed) {
++    return Shape::SeededHash(key, GetHeap()->HashSeed());
++  } else {
++    return Shape::Hash(key);
++  }
++}
++
++template <typename Derived, typename Shape, typename Key>
++uint32_t HashTable<Derived, Shape, Key>::HashForObject(Key key,
++                                                       Object* object) {
++  if (Shape::UsesSeed) {
++    return Shape::SeededHashForObject(key, GetHeap()->HashSeed(), object);
++  } else {
++    return Shape::HashForObject(key, object);
++  }
++}
++
+ PropertyDetails::PropertyDetails(Smi* smi) {
+   value_ = smi->value();
+ }
