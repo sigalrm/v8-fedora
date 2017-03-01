@@ -1,0 +1,21 @@
+diff -up v8-5.2.258/gypfiles/standalone.gypi.ppcfix v8-5.2.258/gypfiles/standalone.gypi
+--- v8-5.2.258/gypfiles/standalone.gypi.ppcfix	2017-03-01 11:15:17.516268618 -0500
++++ v8-5.2.258/gypfiles/standalone.gypi	2017-03-01 11:16:34.750282604 -0500
+@@ -225,7 +225,7 @@
+       }, {
+         'v8_enable_gdbjit%': 0,
+       }],
+-      ['(OS=="linux" or OS=="mac") and (target_arch=="ia32" or target_arch=="x64") and \
++      ['(OS=="linux" or OS=="mac") and (target_arch=="ia32" or target_arch=="x64" or target_arch=="ppc64") and \
+         (v8_target_arch!="x87" and v8_target_arch!="x32")', {
+         'clang%': 1,
+       }, {
+@@ -735,7 +735,7 @@
+             or v8_target_arch=="mips64el")', {
+             'cflags': [ '-Wshorten-64-to-32' ],
+           }],
+-          [ 'host_arch=="ppc64" and OS!="aix"', {
++          [ 'host_arch=="ppc64" and OS!="aix" and clang==0', {
+             'cflags': [ '-mminimal-toc' ],
+           }],
+           [ 'visibility=="hidden" and v8_enable_backtrace==0', {

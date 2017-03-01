@@ -25,7 +25,7 @@
 
 Name:		v8
 Version:	%{somajor}.%{sominor}.%{sobuild}
-Release:	10%{?dist}
+Release:	11%{?dist}
 Epoch:		1
 Summary:	JavaScript Engine
 Group:		System Environment/Libraries
@@ -48,6 +48,7 @@ Patch0:		v8-4.10.91-system_icu.patch
 Patch1:		v8-5.2.197-readdir-fix.patch
 Patch2:		v8-5.2.258-bundled-binutils.patch
 Patch3:		v8-5.2.258-gcc7.patch
+Patch4:		v8-5.2.258-ppc64.patch
 # arm is excluded because of bz1334406
 ExclusiveArch:	%{ix86} x86_64 ppc ppc64 aarch64 %{mips} s390 s390x
 BuildRequires:	readline-devel, libicu-devel
@@ -80,6 +81,7 @@ Python libraries from v8.
 %patch1 -p1 -b .readdir
 %patch2 -p1 -b .bb
 %patch3 -p1 -b .gcc7
+%patch4 -p1 -b .ppc64
 
 # Use system header ... except it doesn't work.
 # rm -rf src/third_party/valgrind/valgrind.h
@@ -229,6 +231,9 @@ chmod -R -x %{buildroot}%{python_sitelib}/*.py*
 %{python_sitelib}/j*.py*
 
 %changelog
+* Wed Mar  1 2017 Tom Callaway <spot@fedoraproject.org> - 1:5.2.258-11
+- fix ppc64 build
+
 * Tue Feb 28 2017 Tom Callaway <spot@fedoraproject.org> - 1:5.2.258-10
 - fix ftbfs (thanks to Ben Noordhuis)
 
