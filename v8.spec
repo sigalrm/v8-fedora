@@ -25,7 +25,7 @@
 
 Name:		v8
 Version:	%{somajor}.%{sominor}.%{sobuild}
-Release:	11%{?dist}
+Release:	12%{?dist}
 Epoch:		1
 Summary:	JavaScript Engine
 Group:		System Environment/Libraries
@@ -231,6 +231,9 @@ chmod -R -x %{buildroot}%{python_sitelib}/*.py*
 %{python_sitelib}/j*.py*
 
 %changelog
+* Thu Jul 27 2017 Fedora Release Engineering <releng@fedoraproject.org> - 1:5.2.258-12
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_27_Mass_Rebuild
+
 * Wed Mar  1 2017 Tom Callaway <spot@fedoraproject.org> - 1:5.2.258-11
 - fix ppc64 build
 
