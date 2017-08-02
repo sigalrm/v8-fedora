@@ -1,0 +1,28 @@
+diff -up v8-6.2.91/BUILD.gn.sover v8-6.2.91/BUILD.gn
+--- v8-6.2.91/BUILD.gn.sover	2017-07-31 11:24:31.000000000 -0400
++++ v8-6.2.91/BUILD.gn	2017-08-02 12:10:57.825931436 -0400
+@@ -2422,6 +2422,7 @@ v8_component("v8_libbase") {
+ 
+   if (is_component_build) {
+     defines = [ "BUILDING_V8_BASE_SHARED" ]
++    output_extension = "so.6"
+   }
+ 
+   if (is_posix) {
+@@ -2532,6 +2533,7 @@ v8_component("v8_libplatform") {
+ 
+   if (is_component_build) {
+     defines = [ "BUILDING_V8_PLATFORM_SHARED" ]
++    output_extension = "so.6"
+   }
+ 
+   public_configs = [ ":libplatform_config" ]
+@@ -2682,6 +2684,8 @@ if (is_component_build) {
+       "src/v8dll-main.cc",
+     ]
+ 
++    output_extension = "so.6"
++
+     public_deps = [
+       ":v8_base",
+       ":v8_maybe_snapshot",

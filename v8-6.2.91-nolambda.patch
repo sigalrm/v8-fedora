@@ -1,0 +1,12 @@
+diff -up v8-6.2.91/build/config/compiler/BUILD.gn.nolambda v8-6.2.91/build/config/compiler/BUILD.gn
+--- v8-6.2.91/build/config/compiler/BUILD.gn.nolambda	2017-08-01 14:28:53.499913889 -0400
++++ v8-6.2.91/build/config/compiler/BUILD.gn	2017-08-01 14:29:03.242607676 -0400
+@@ -1171,7 +1171,7 @@ config("default_warnings") {
+         "-Wno-address-of-packed-member",
+ 
+         # TODO(hans): https://crbug.com/681136
+-        "-Wno-unused-lambda-capture",
++        # "-Wno-unused-lambda-capture",
+ 
+         # TODO(thakis ): https://crbug.com/683349
+         "-Wno-user-defined-warnings",

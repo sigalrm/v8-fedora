@@ -18,14 +18,14 @@
 # For 1.3+, we use the three digit versions
 # Hey, now there are four digits. What do they mean? Popsicle.
 # Now there are three digits. Yeah. HOW ABOUT DEM APPLES?!?
-%global somajor 5
+%global somajor 6
 %global sominor 2
-%global sobuild 258
-%global sover %{somajor}.%{sominor}.%{sobuild}
+%global sobuild 91
+%global sover %{somajor}
 
 Name:		v8
 Version:	%{somajor}.%{sominor}.%{sobuild}
-Release:	12%{?dist}
+Release:	1%{?dist}
 Epoch:		1
 Summary:	JavaScript Engine
 Group:		System Environment/Libraries
@@ -38,22 +38,27 @@ URL:		https://chromium.googlesource.com/v8/v8/
 # cd v8-tmp
 # fetch v8
 # cd v8
-# git checkout 5.2.258
+# git checkout 6.2.91
 # gclient sync
 # cd ..
-# mv v8 v8-5.2.258
-# tar -c  --exclude=.git --exclude=build/linux -J -f v8-5.2.258.tar.xz v8-5.2.258
-Source0:	v8-5.2.258.tar.xz
+# mv v8 v8-6.2.91
+# tar -c  --exclude=.git --exclude=build/linux -J -f v8-6.2.91.tar.xz v8-6.2.91
+Source0:	v8-6.2.91.tar.xz
+# https://chromium.googlesource.com/chromium/tools/depot_tools.git/+archive/7e7a454f9afdddacf63e10be48f0eab603be654e.tar.gz
+Source1:        depot_tools.git-master.tar.gz
+# Taken from chromium-60.0.3112.78/build/linux/unbundle/icu.gn
+Source2:	icu.gn
 Patch0:		v8-4.10.91-system_icu.patch
-Patch1:		v8-5.2.197-readdir-fix.patch
 Patch2:		v8-5.2.258-bundled-binutils.patch
 Patch3:		v8-5.2.258-gcc7.patch
-Patch4:		v8-5.2.258-ppc64.patch
+Patch4:		v8-6.2.91-ppc64.patch
+Patch5:		v8-6.2.91-nolambda.patch
+Patch6:		v8-6.2.91-sover.patch
 # arm is excluded because of bz1334406
 ExclusiveArch:	%{ix86} x86_64 ppc ppc64 aarch64 %{mips} s390 s390x
 BuildRequires:	readline-devel, libicu-devel
 BuildRequires:	python2-devel
-BuildRequires:	clang
+BuildRequires:	clang, llvm
 
 %description
 V8 is Google's open source JavaScript engine. V8 is written in C++ and is used 
@@ -76,12 +81,16 @@ Requires:	%{name} = %{epoch}:%{version}-%{release}
 Python libraries from v8.
 
 %prep
+%setup -q -T -c -n depot_tools -a 1
 %setup -q -n %{name}-%{version}
 %patch0 -p1 -b .system_icu
-%patch1 -p1 -b .readdir
 %patch2 -p1 -b .bb
-%patch3 -p1 -b .gcc7
+# %%patch3 -p1 -b .gcc7
 %patch4 -p1 -b .ppc64
+%patch5 -p1 -b .nolambda
+%patch6 -p1 -b .sover
+
+cp -a %{SOURCE2} third_party/icu/BUILD.gn
 
 # Use system header ... except it doesn't work.
 # rm -rf src/third_party/valgrind/valgrind.h
@@ -91,15 +100,19 @@ Python libraries from v8.
 for i in `find . -type f -name '*.mk'`; do sed -i 's|alink_thin|alink|g' $i; done
 sed -i "s|'alink_thin'|'alink'|g" tools/gyp/pylib/gyp/generator/make.py
 sed -i "s|'alink_thin'|'alink'|g" tools/gyp/pylib/gyp/generator/ninja.py
-sed -i "s|crsT|crs|g" out/Makefile
+# sed -i "s|crsT|crs|g" out/Makefile
 sed -i "s|crsT|crs|g" tools/gyp/pylib/gyp/generator/make.py
 
 
-# What? *sigh*
 rm -rf third_party/binutils/Linux_x64/Release/bin/ld.gold
-ln -s /usr/bin/ld.gold third_party/binutils/Linux_x64/Release/bin/ld.gold
-rm -rf third_party/llvm-build/Release+Asserts/bin/clang
-ln -s /usr/bin/clang third_party/llvm-build/Release+Asserts/bin/clang
+rm -rf third_party/llvm-build/Release+Asserts
+mkdir -p third_party/llvm-build/Release+Asserts/bin
+pushd third_party/llvm-build/Release+Asserts/bin
+ln -s /usr/bin/clang clang
+ln -s /usr/bin/clang++ clang++
+ln -s /usr/bin/llvm-ar llvm-ar
+popd
+
 
 #Patch7 needs -lrt on glibc < 2.17 (RHEL <= 6)
 %if (0%{?rhel} > 6 || 0%{?fedora} > 18)
@@ -150,39 +163,37 @@ done
 %global v8arch s390x
 %endif
 
-make %{v8arch}.release \
+V8_GN_DEFINES=""
+V8_GN_DEFINES+=' use_sysroot=false use_gold=false enable_nacl=false linux_use_bundled_binutils=false is_component_build=true clang_use_chrome_plugins=false'
+V8_GN_DEFINES+=' libcpp_is_static=true v8_use_external_startup_data=false'
+V8_GN_DEFINES+=' v8_target_cpu="%{v8arch}"'
 %ifarch armv7hl armv7hnl
-armfloatabi=hard \
+V8_GN_DEFINES+=' arm_float_abi="hard"'
 %endif
 %ifarch armv5tel armv6l armv7l
-armfloatabi=softfp \
+V8_GN_DEFINES+=' arm_float_abi="softfp"'
 %endif
-system_icu=on \
-soname_version=%{somajor} \
-snapshot=external \
-library=shared %{?_smp_mflags} \
-bundledbinutils=off \
-CC=%{_bindir}/clang \
-CXX=%{_bindir}/clang++ \
-CFLAGS="%{clang_optflags}" \
-CXXFLAGS="%{clang_optflags}" \
-LDFLAGS="%{clang_ldflags}" \
-V=1
+
+export PATH=$PATH:%{_builddir}/depot_tools
+CHROMIUM_BUILDTOOLS_PATH=./buildtools/ gn gen out.gn/%{v8arch}.release --args="$V8_GN_DEFINES"
+mkdir -p out.gn/%{v8arch}.release/gen/shim_headers/icui18n_shim/third_party/icu/source/i18n/unicode
+mkdir -p out.gn/%{v8arch}.release/gen/shim_headers/icuuc_shim/third_party/icu/source/common/unicode
+../depot_tools/ninja -vvv -C out.gn/%{v8arch}.release
 
 %install
-pushd out/%{v8arch}.release
+pushd out.gn/%{v8arch}.release
 # library first
 mkdir -p %{buildroot}%{_libdir}
-cp -a lib.target/libv8.so.%{somajor} %{buildroot}%{_libdir}
-# Now, the static libraries that some/most/all v8 applications also need to link against.
-cp -a obj.target/src/libv8_*.a %{buildroot}%{_libdir}
+cp -a libv8*.so.%{somajor} %{buildroot}%{_libdir}
 # Next, binaries
 mkdir -p %{buildroot}%{_bindir}
 install -p -m0755 d8 %{buildroot}%{_bindir}
-# install -p -m0755 mksnapshot %{buildroot}%{_bindir}
-install -p -m0755 parser_fuzzer %{buildroot}%{_bindir}
+install -p -m0755 mksnapshot %{buildroot}%{_bindir}
+# install -p -m0755 parser_fuzzer %{buildroot}%{_bindir}
+%if 0
 # BLOBS! (Don't stress. They get built out of source code.)
 install -p natives_blob.bin snapshot_blob.bin %{buildroot}%{_libdir}
+%endif
 popd
 
 # Now, headers
@@ -214,10 +225,11 @@ chmod -R -x %{buildroot}%{python_sitelib}/*.py*
 %license LICENSE
 %doc AUTHORS ChangeLog
 %{_bindir}/d8
-# %%{_bindir}/mksnapshot
-%{_bindir}/parser_fuzzer
+%{_bindir}/mksnapshot
 %{_libdir}/*.so.*
+%if 0
 %{_libdir}/*.bin
+%endif
 
 %files devel
 %{_includedir}/*.h
@@ -225,12 +237,14 @@ chmod -R -x %{buildroot}%{python_sitelib}/*.py*
 %dir %{_includedir}/v8/
 %{_includedir}/v8/extensions/
 %{_libdir}/*.so
-%{_libdir}/*.a
 
 %files python
 %{python_sitelib}/j*.py*
 
 %changelog
+* Mon Jul 31 2017 Tom Callaway <spot@fedoraproject.org> - 1:6.2.91-1
+- 6.2.91
+
 * Thu Jul 27 2017 Fedora Release Engineering <releng@fedoraproject.org> - 1:5.2.258-12
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_27_Mass_Rebuild
 
