@@ -54,6 +54,7 @@ Patch3:		v8-5.2.258-gcc7.patch
 Patch4:		v8-6.2.91-ppc64.patch
 Patch5:		v8-6.2.91-nolambda.patch
 Patch6:		v8-6.2.91-sover.patch
+Patch7:		v8-6.2.91-noxlocale.patch
 # arm is excluded because of bz1334406
 ExclusiveArch:	%{ix86} x86_64 ppc ppc64 aarch64 %{mips} s390 s390x
 BuildRequires:	readline-devel, libicu-devel
@@ -89,6 +90,7 @@ Python libraries from v8.
 %patch4 -p1 -b .ppc64
 %patch5 -p1 -b .nolambda
 %patch6 -p1 -b .sover
+%patch7 -p1 -b .noxlocale
 
 cp -a %{SOURCE2} third_party/icu/BUILD.gn
 
