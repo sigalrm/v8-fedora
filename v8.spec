@@ -57,7 +57,7 @@ Patch6:		v8-6.2.91-sover.patch
 # arm is excluded because of bz1334406
 ExclusiveArch:	%{ix86} x86_64 ppc ppc64 aarch64 %{mips} s390 s390x
 BuildRequires:	readline-devel, libicu-devel
-BuildRequires:	python2-devel
+BuildRequires:	python2-devel, glib-devel
 BuildRequires:	clang, llvm
 
 %description
