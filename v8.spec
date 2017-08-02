@@ -55,8 +55,7 @@ Patch4:		v8-6.2.91-ppc64.patch
 Patch5:		v8-6.2.91-nolambda.patch
 Patch6:		v8-6.2.91-sover.patch
 Patch7:		v8-6.2.91-noxlocale.patch
-# arm is excluded because of bz1334406
-ExclusiveArch:	%{ix86} x86_64 ppc ppc64 aarch64 %{mips} s390 s390x
+ExclusiveArch:	%{ix86} x86_64 %{arm} ppc ppc64 aarch64 mipsel mips64el s390 s390x
 BuildRequires:	readline-devel, libicu-devel
 BuildRequires:	python2-devel, glib2-devel
 BuildRequires:	clang, llvm
@@ -132,7 +131,7 @@ done
 %global v8arch x64
 %endif
 %ifarch %{ix86}
-%global v8arch ia32
+%global v8arch x86
 %endif
 %ifarch %{arm}
 %global v8arch arm
@@ -140,14 +139,8 @@ done
 %ifarch aarch64
 %global v8arch arm64
 %endif
-%ifarch mips
-%global v8arch mips
-%endif
 %ifarch mipsel
 %global v8arch mipsel
-%endif
-%ifarch mips64
-%global v8arch mips64
 %endif
 %ifarch mips64el
 %global v8arch mips64el
