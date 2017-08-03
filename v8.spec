@@ -62,6 +62,9 @@ Patch4:		v8-6.2.91-ppc64.patch
 Patch5:		v8-6.2.91-nolambda.patch
 Patch6:		v8-6.2.91-sover.patch
 Patch7:		v8-6.2.91-noxlocale.patch
+# do not assume we are cross compiling
+# silly google
+Patch8:		v8-6.2.91-notcross.patch
 ExclusiveArch:	%{ix86} x86_64 %{arm} ppc ppc64 aarch64 mipsel mips64el s390 s390x
 BuildRequires:	readline-devel, libicu-devel, ninja-build
 BuildRequires:	python2-devel, glib2-devel, libatomic
@@ -97,6 +100,7 @@ Python libraries from v8.
 %patch5 -p1 -b .nolambda
 %patch6 -p1 -b .sover
 %patch7 -p1 -b .noxlocale
+%patch8 -p1 -b .notcross
 
 cp -a %{SOURCE2} third_party/icu/BUILD.gn
 
