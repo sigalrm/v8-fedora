@@ -1,0 +1,23 @@
+diff -up v8-6.2.91/build/toolchain/linux/BUILD.gn.memexhaust v8-6.2.91/build/toolchain/linux/BUILD.gn
+--- v8-6.2.91/build/toolchain/linux/BUILD.gn.memexhaust	2017-08-03 11:59:42.310877752 -0400
++++ v8-6.2.91/build/toolchain/linux/BUILD.gn	2017-08-03 12:00:13.030150723 -0400
+@@ -55,6 +55,9 @@ clang_toolchain("clang_x86") {
+   # Output linker map files for binary size analysis.
+   enable_linker_map = true
+ 
++  # Turn debugging down to avoid memory exhaustion
++  extra_cppflags = "-g1"
++
+   toolchain_args = {
+     current_cpu = "x86"
+     current_os = "linux"
+@@ -94,6 +97,9 @@ gcc_toolchain("x86") {
+   ar = "ar"
+   ld = cxx
+ 
++  # Turn debugging down to avoid memory exhaustion
++  extra_cppflags = "-g1"
++
+   # Output linker map files for binary size analysis.
+   enable_linker_map = true
+ 

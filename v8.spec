@@ -65,6 +65,8 @@ Patch7:		v8-6.2.91-noxlocale.patch
 # do not assume we are cross compiling
 # silly google
 Patch8:		v8-6.2.91-notcross.patch
+# Use -g1 to avoid mem exhaust on i686
+Patch9:		v8-6.2.91-i686-g1-to-avoid-mem-exhaust.patch
 ExclusiveArch:	%{ix86} x86_64 %{arm} ppc ppc64 aarch64 mipsel mips64el s390 s390x
 BuildRequires:	readline-devel, libicu-devel, ninja-build
 BuildRequires:	python2-devel, glib2-devel, libatomic
@@ -101,6 +103,7 @@ Python libraries from v8.
 %patch6 -p1 -b .sover
 %patch7 -p1 -b .noxlocale
 %patch8 -p1 -b .notcross
+%patch9 -p1 -b .memexhaust
 
 cp -a %{SOURCE2} third_party/icu/BUILD.gn
 
