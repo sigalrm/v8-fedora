@@ -58,7 +58,6 @@ Source4:	gn-source-gitf833e90.tar.bz2
 Patch0:		v8-4.10.91-system_icu.patch
 Patch2:		v8-5.2.258-bundled-binutils.patch
 Patch3:		v8-5.2.258-gcc7.patch
-Patch4:		v8-6.2.91-ppc64.patch
 Patch5:		v8-6.2.91-nolambda.patch
 Patch6:		v8-6.2.91-sover.patch
 Patch7:		v8-6.2.91-noxlocale.patch
@@ -67,7 +66,9 @@ Patch7:		v8-6.2.91-noxlocale.patch
 Patch8:		v8-6.2.91-notcross.patch
 # On i686, use -g1 to avoid mem exhaust
 Patch9:		v8-6.2.91-i686-g1-to-avoid-mem-exhaust.patch
-ExclusiveArch:	%{ix86} x86_64 %{arm} ppc ppc64 aarch64 mipsel mips64el s390 s390x
+# PPC64 doesn't like libcxx code.
+# error: '(9.223372036854775807e+18 / 1.0e+9)' is not a constant expression
+ExclusiveArch:	%{ix86} x86_64 %{arm} ppc aarch64 mipsel mips64el s390 s390x
 BuildRequires:	readline-devel, libicu-devel, ninja-build
 BuildRequires:	python2-devel, glib2-devel, libatomic
 BuildRequires:	clang, llvm
@@ -98,7 +99,6 @@ Python libraries from v8.
 %patch0 -p1 -b .system_icu
 %patch2 -p1 -b .bb
 # %%patch3 -p1 -b .gcc7
-%patch4 -p1 -b .ppc64
 %patch5 -p1 -b .nolambda
 %patch6 -p1 -b .sover
 %patch7 -p1 -b .noxlocale
