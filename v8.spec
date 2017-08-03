@@ -48,6 +48,13 @@ Source0:	v8-6.2.91.tar.xz
 Source1:        depot_tools.git-master.tar.gz
 # Taken from chromium-60.0.3112.78/build/linux/unbundle/icu.gn
 Source2:	icu.gn
+# Needed to build gn. :P
+# git clone https://chromium.googlesource.com/chromium/src/base
+# tar cvfj chromium-base-git2d35e4d.tar.bz2 base/
+Source3:	chromium-base-git2d35e4d.tar.bz2
+# git clone https://chromium.googlesource.com/chromium/src/tools/gn
+# tar cvfj gn-source-gitf833e90.tar.bz2 gn/
+Source4:	gn-source-gitf833e90.tar.bz2
 Patch0:		v8-4.10.91-system_icu.patch
 Patch2:		v8-5.2.258-bundled-binutils.patch
 Patch3:		v8-5.2.258-gcc7.patch
@@ -56,7 +63,7 @@ Patch5:		v8-6.2.91-nolambda.patch
 Patch6:		v8-6.2.91-sover.patch
 Patch7:		v8-6.2.91-noxlocale.patch
 ExclusiveArch:	%{ix86} x86_64 %{arm} ppc ppc64 aarch64 mipsel mips64el s390 s390x
-BuildRequires:	readline-devel, libicu-devel
+BuildRequires:	readline-devel, libicu-devel, ninja-build
 BuildRequires:	python2-devel, glib2-devel
 BuildRequires:	clang, llvm
 
@@ -82,7 +89,7 @@ Python libraries from v8.
 
 %prep
 %setup -q -T -c -n depot_tools -a 1
-%setup -q -n %{name}-%{version}
+%setup -q -n %{name}-%{version} -a 3
 %patch0 -p1 -b .system_icu
 %patch2 -p1 -b .bb
 # %%patch3 -p1 -b .gcc7
@@ -92,6 +99,10 @@ Python libraries from v8.
 %patch7 -p1 -b .noxlocale
 
 cp -a %{SOURCE2} third_party/icu/BUILD.gn
+
+pushd tools
+tar xvf %{SOURCE4}
+popd
 
 # Use system header ... except it doesn't work.
 # rm -rf src/third_party/valgrind/valgrind.h
@@ -113,14 +124,6 @@ ln -s /usr/bin/clang clang
 ln -s /usr/bin/clang++ clang++
 ln -s /usr/bin/llvm-ar llvm-ar
 popd
-
-
-#Patch7 needs -lrt on glibc < 2.17 (RHEL <= 6)
-%if (0%{?rhel} > 6 || 0%{?fedora} > 18)
-%global lrt %{nil}
-%else
-%global lrt -lrt
-%endif
 
 for i in `grep -rl "Wno-undefined-var-template" *`; do
 	sed -i 's|-Wno-undefined-var-template||g' $i
@@ -157,6 +160,19 @@ done
 %ifarch s390x
 %global v8arch s390x
 %endif
+
+# DO THE HARLEM SHAKE
+# err... I mean, build gn from source.
+pushd tools/gn
+./bootstrap/bootstrap.py -s
+popd
+rm -rf buildtools/linux64/gn*
+# the tooling thinks all linux is "linux64"
+cp -a out/Release/gn buildtools/linux64/gn
+
+# Replace ninja in depot_tools
+rm -rf ../depot_tools/ninja
+ln -s /usr/bin/ninja ../depot_tools/ninja
 
 V8_GN_DEFINES=""
 V8_GN_DEFINES+=' use_sysroot=false use_gold=false enable_nacl=false linux_use_bundled_binutils=false is_component_build=true clang_use_chrome_plugins=false'
