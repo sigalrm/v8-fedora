@@ -64,7 +64,7 @@ Patch6:		v8-6.2.91-sover.patch
 Patch7:		v8-6.2.91-noxlocale.patch
 ExclusiveArch:	%{ix86} x86_64 %{arm} ppc ppc64 aarch64 mipsel mips64el s390 s390x
 BuildRequires:	readline-devel, libicu-devel, ninja-build
-BuildRequires:	python2-devel, glib2-devel
+BuildRequires:	python2-devel, glib2-devel, libatomic
 BuildRequires:	clang, llvm
 
 %description
