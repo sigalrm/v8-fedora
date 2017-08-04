@@ -5,7 +5,7 @@ diff -up v8-6.2.91/build/config/compiler/BUILD.gn.nounused v8-6.2.91/build/confi
          cflags += [ "-gdwarf-3" ]
        }
        cflags += [ "-g2" ]
-+      cflags += [ "-Wno-unused-function" ]
++      cflags += [ "-Wno-unused-function" , "-Wno-unused-result" ]
      }
      if (use_debug_fission) {
        cflags += [ "-gsplit-dwarf" ]
