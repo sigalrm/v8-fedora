@@ -66,13 +66,12 @@ Patch7:		v8-6.2.91-noxlocale.patch
 Patch8:		v8-6.2.91-notcross.patch
 # On i686 and armv7hl, use -g1 to avoid mem exhaust
 Patch9:		v8-6.2.91-i686-g1-to-avoid-mem-exhaust.patch
-# On s390x
-Patch10:	v8-6.2.91-nounused-function.patch
 
 # PPC64 doesn't like libcxx code.
 # error: '(9.223372036854775807e+18 / 1.0e+9)' is not a constant expression
 # aarch64 doesn't work either.
-ExclusiveArch:	%{ix86} x86_64 %{arm} ppc mipsel mips64el s390 s390x
+# code does not compile on s390
+ExclusiveArch:	%{ix86} x86_64 %{arm} ppc mipsel mips64el
 BuildRequires:	readline-devel, libicu-devel, ninja-build
 BuildRequires:	python2-devel, glib2-devel, libatomic
 BuildRequires:	clang, llvm
@@ -109,9 +108,6 @@ Python libraries from v8.
 %patch8 -p1 -b .notcross
 %ifarch i686 armv7hl
 %patch9 -p1 -b .memexhaust
-%endif
-%ifarch s390x
-%patch10 -p1 -b .nounused
 %endif
 
 cp -a %{SOURCE2} third_party/icu/BUILD.gn
