@@ -25,7 +25,7 @@
 
 Name:		v8
 Version:	%{somajor}.%{sominor}.%{sobuild}
-Release:	1%{?dist}
+Release:	2%{?dist}
 Epoch:		1
 Summary:	JavaScript Engine
 Group:		System Environment/Libraries
@@ -90,11 +90,15 @@ Requires:	%{name} = %{epoch}:%{version}-%{release}
 %description devel
 Development headers and libraries for v8.
 
-%package python
+%package -n python2-v8
+%{?python_provide:%python_provide python2-v8}
+# Remove before F30
+Provides: %{name}-python%{?_isa} = %{version}-%{release}
+Obsoletes: %{name}-python < %{version}-%{release}
 Summary:	Python libraries from v8
 Requires:	%{name} = %{epoch}:%{version}-%{release}
 
-%description python
+%description -n python2-v8
 Python libraries from v8.
 
 %prep
@@ -265,10 +269,14 @@ chmod -R -x %{buildroot}%{python_sitelib}/*.py*
 %{_includedir}/v8/extensions/
 %{_libdir}/*.so
 
-%files python
+%files -n python2-v8
 %{python_sitelib}/j*.py*
 
 %changelog
+* Sat Aug 19 2017 Zbigniew Jędrzejewski-Szmek <zbyszek@in.waw.pl> - 1:6.2.91-2
+- Python 2 binary package renamed to python2-v8
+  See https://fedoraproject.org/wiki/FinalizingFedoraSwitchtoPython3
+
 * Mon Jul 31 2017 Tom Callaway <spot@fedoraproject.org> - 1:6.2.91-1
 - 6.2.91
 
