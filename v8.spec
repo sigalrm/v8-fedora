@@ -25,7 +25,7 @@
 
 Name:		v8
 Version:	%{somajor}.%{sominor}.%{sobuild}
-Release:	3%{?dist}
+Release:	4%{?dist}
 Epoch:		1
 Summary:	JavaScript Engine
 Group:		System Environment/Libraries
@@ -66,6 +66,9 @@ Patch7:		v8-6.2.91-noxlocale.patch
 Patch8:		v8-6.2.91-notcross.patch
 # On i686 and armv7hl, use -g1 to avoid mem exhaust
 Patch9:		v8-6.2.91-i686-g1-to-avoid-mem-exhaust.patch
+# Fedora 25 and older need less flags
+# and clang is not tolerant of flags it doesn't know about
+Patch10:	v8-6.2.91-oldclang-flags.patch
 
 # PPC64 doesn't like libcxx code.
 # error: '(9.223372036854775807e+18 / 1.0e+9)' is not a constant expression
@@ -113,6 +116,9 @@ Python libraries from v8.
 %patch8 -p1 -b .notcross
 %ifarch i686 armv7hl
 %patch9 -p1 -b .memexhaust
+%endif
+%if 0%{?fedora} <= 25
+%patch10 -p1 -b .oldflags
 %endif
 
 cp -a %{SOURCE2} third_party/icu/BUILD.gn
@@ -270,6 +276,9 @@ chmod -R -x %{buildroot}%{python_sitelib}/*.py*
 %{python_sitelib}/j*.py*
 
 %changelog
+* Thu Aug 31 2017 Tom Callaway <spot@fedoraproject.org> - 1:6.2.91-4
+- disable some cflags on fedora 25 or older
+
 * Sun Aug 20 2017 Zbigniew Jędrzejewski-Szmek <zbyszek@in.waw.pl> - 1:6.2.91-3
 - Add Provides for the old name without %%_isa
 

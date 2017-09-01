@@ -1,0 +1,19 @@
+diff -up v8-6.2.91/build/config/compiler/BUILD.gn.oldclang v8-6.2.91/build/config/compiler/BUILD.gn
+--- v8-6.2.91/build/config/compiler/BUILD.gn.oldclang	2017-08-31 21:05:13.342875120 -0400
++++ v8-6.2.91/build/config/compiler/BUILD.gn	2017-08-31 21:05:40.092124090 -0400
+@@ -1168,13 +1168,13 @@ config("default_warnings") {
+         "-Wno-nonportable-include-path",
+ 
+         # TODO(hans): https://crbug.com/637306
+-        "-Wno-address-of-packed-member",
++        # "-Wno-address-of-packed-member",
+ 
+         # TODO(hans): https://crbug.com/681136
+         # "-Wno-unused-lambda-capture",
+ 
+         # TODO(thakis ): https://crbug.com/683349
+-        "-Wno-user-defined-warnings",
++        # "-Wno-user-defined-warnings",
+       ]
+     } else if (use_xcode_clang && xcode_version_int >= 830) {
+       # This is necessary to allow a progressive transition from using xcode 8.0
