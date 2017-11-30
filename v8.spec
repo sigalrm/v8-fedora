@@ -25,7 +25,7 @@
 
 Name:		v8
 Version:	%{somajor}.%{sominor}.%{sobuild}
-Release:	4%{?dist}
+Release:	5%{?dist}
 Epoch:		1
 Summary:	JavaScript Engine
 Group:		System Environment/Libraries
@@ -276,6 +276,9 @@ chmod -R -x %{buildroot}%{python_sitelib}/*.py*
 %{python_sitelib}/j*.py*
 
 %changelog
+* Thu Nov 30 2017 Pete Walter <pwalter@fedoraproject.org> - 1:6.2.91-5
+- Rebuild for ICU 60.1
+
 * Thu Aug 31 2017 Tom Callaway <spot@fedoraproject.org> - 1:6.2.91-4
 - disable some cflags on fedora 25 or older
 
