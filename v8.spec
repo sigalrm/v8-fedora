@@ -241,6 +241,7 @@ install -p src/extensions/*.h %{buildroot}%{_includedir}/v8/extensions/
 # Make shared library links
 pushd %{buildroot}%{_libdir}
 ln -sf libv8.so.%{somajor} libv8.so
+ln -sf libv8_libplatform.so.%{somajor} libv8_libplatform.so
 popd
 
 # install Python JS minifier scripts for nodejs
