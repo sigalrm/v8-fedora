@@ -25,7 +25,7 @@
 
 Name:		v8
 Version:	%{somajor}.%{sominor}.%{sobuild}
-Release:	6%{?dist}
+Release:	7%{?dist}
 Epoch:		1
 Summary:	JavaScript Engine
 Group:		System Environment/Libraries
@@ -277,6 +277,9 @@ chmod -R -x %{buildroot}%{python_sitelib}/*.py*
 %{python_sitelib}/j*.py*
 
 %changelog
+* Mon Feb 19 2018 Tom Callaway <spot@fedoraproject.org> - 1:6.2.91-7
+- fix platform library symlink
+
 * Fri Feb 09 2018 Fedora Release Engineering <releng@fedoraproject.org> - 1:6.2.91-6
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_28_Mass_Rebuild
 
