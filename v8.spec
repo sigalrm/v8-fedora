@@ -19,13 +19,13 @@
 # Hey, now there are four digits. What do they mean? Popsicle.
 # Now there are three digits. Yeah. HOW ABOUT DEM APPLES?!?
 %global somajor 6
-%global sominor 2
-%global sobuild 91
+%global sominor 7
+%global sobuild 17
 %global sover %{somajor}
 
 Name:		v8
 Version:	%{somajor}.%{sominor}.%{sobuild}
-Release:	7%{?dist}
+Release:	1%{?dist}
 Epoch:		1
 Summary:	JavaScript Engine
 Group:		System Environment/Libraries
@@ -38,12 +38,12 @@ URL:		https://chromium.googlesource.com/v8/v8/
 # cd v8-tmp
 # fetch v8
 # cd v8
-# git checkout 6.2.91
+# git checkout 6.7.17
 # gclient sync
 # cd ..
-# mv v8 v8-6.2.91
-# tar -c  --exclude=.git --exclude=build/linux -J -f v8-6.2.91.tar.xz v8-6.2.91
-Source0:	v8-6.2.91.tar.xz
+# mv v8 v8-6.7.17
+# tar -c  --exclude=.git --exclude=build/linux -J -f v8-6.7.17.tar.xz v8-6.7.17
+Source0:	v8-6.7.17.tar.xz
 # https://chromium.googlesource.com/chromium/tools/depot_tools.git/+archive/7e7a454f9afdddacf63e10be48f0eab603be654e.tar.gz
 Source1:        depot_tools.git-master.tar.gz
 # Taken from chromium-60.0.3112.78/build/linux/unbundle/icu.gn
@@ -55,20 +55,26 @@ Source3:	chromium-base-git2d35e4d.tar.bz2
 # git clone https://chromium.googlesource.com/chromium/src/tools/gn
 # tar cvfj gn-source-gitf833e90.tar.bz2 gn/
 Source4:	gn-source-gitf833e90.tar.bz2
-Patch0:		v8-4.10.91-system_icu.patch
-Patch2:		v8-5.2.258-bundled-binutils.patch
+# Patch0:		v8-4.10.91-system_icu.patch
+# Patch2:		v8-5.2.258-bundled-binutils.patch
 Patch3:		v8-5.2.258-gcc7.patch
 Patch5:		v8-6.2.91-nolambda.patch
 Patch6:		v8-6.2.91-sover.patch
-Patch7:		v8-6.2.91-noxlocale.patch
+# Patch7:		v8-6.2.91-noxlocale.patch
 # do not assume we are cross compiling
 # silly google
-Patch8:		v8-6.2.91-notcross.patch
+Patch8:		v8-6.7.17-notcross.patch
 # On i686 and armv7hl, use -g1 to avoid mem exhaust
 Patch9:		v8-6.2.91-i686-g1-to-avoid-mem-exhaust.patch
 # Fedora 25 and older need less flags
 # and clang is not tolerant of flags it doesn't know about
 Patch10:	v8-6.2.91-oldclang-flags.patch
+# Workaround gcc8 bug in gn
+Patch11:	v8-6.2.91-gcc8-gn-fabi11.patch
+# So many gcc fixes
+Patch12:	v8-6.7.17-fixme.patch
+# Use Fedora optflags
+Patch13:	v8-6.7.17-optflags.patch
 
 # PPC64 doesn't like libcxx code.
 # error: '(9.223372036854775807e+18 / 1.0e+9)' is not a constant expression
@@ -77,7 +83,8 @@ Patch10:	v8-6.2.91-oldclang-flags.patch
 ExclusiveArch:	%{ix86} x86_64 %{arm} ppc mipsel mips64el
 BuildRequires:	readline-devel, libicu-devel, ninja-build
 BuildRequires:	python2-devel, glib2-devel, libatomic
-BuildRequires:	clang, llvm
+# BuildRequires:	clang, llvm
+BuildRequires:	gcc, gcc-c++
 
 %description
 V8 is Google's open source JavaScript engine. V8 is written in C++ and is used 
@@ -107,12 +114,12 @@ Python libraries from v8.
 %prep
 %setup -q -T -c -n depot_tools -a 1
 %setup -q -n %{name}-%{version} -a 3
-%patch0 -p1 -b .system_icu
-%patch2 -p1 -b .bb
+# %%patch0 -p1 -b .system_icu
+# %%patch2 -p1 -b .bb
 # %%patch3 -p1 -b .gcc7
 %patch5 -p1 -b .nolambda
 %patch6 -p1 -b .sover
-%patch7 -p1 -b .noxlocale
+# %%patch7 -p1 -b .noxlocale
 %patch8 -p1 -b .notcross
 %ifarch i686 armv7hl
 %patch9 -p1 -b .memexhaust
@@ -126,6 +133,25 @@ cp -a %{SOURCE2} third_party/icu/BUILD.gn
 pushd tools
 tar xvf %{SOURCE4}
 popd
+
+%patch11 -p1 -b .fabi11
+%patch12 -p1 -b .fixme
+%patch13 -p1 -b .optflags
+
+SPLITOPTFLAGS=""
+for i in `echo %{optflags} | sed 's/ /\n/g'`; do
+	SPLITOPTFLAGS+="\"$i\", "
+done
+export SPLITOPTFLAGS
+
+SPLITLDFLAGS=""
+for j in `echo %{build_ldflags} | sed 's/ /\n/g'`; do
+	SPLITLDFLAGS+="\"$j\", "
+done
+export SPLITLDFLAGS
+
+sed -i "s|\"\$OPTFLAGS\"|$SPLITOPTFLAGS|g" build/config/compiler/BUILD.gn
+sed -i "s|\"\$OPTLDFLAGS\"|$SPLITLDFLAGS|g" build/config/compiler/BUILD.gn
 
 # Use system header ... except it doesn't work.
 # rm -rf src/third_party/valgrind/valgrind.h
@@ -201,6 +227,7 @@ V8_GN_DEFINES=""
 V8_GN_DEFINES+=' use_sysroot=false use_gold=false enable_nacl=false linux_use_bundled_binutils=false is_component_build=true clang_use_chrome_plugins=false'
 V8_GN_DEFINES+=' libcpp_is_static=true v8_use_external_startup_data=false'
 V8_GN_DEFINES+=' v8_target_cpu="%{v8arch}"'
+V8_GN_DEFINES+=' is_clang=false'
 %ifarch armv7hl armv7hnl
 V8_GN_DEFINES+=' arm_float_abi="hard"'
 %endif
@@ -277,6 +304,9 @@ chmod -R -x %{buildroot}%{python_sitelib}/*.py*
 %{python_sitelib}/j*.py*
 
 %changelog
+* Tue Mar  6 2018 Tom Callaway <spot@fedoraproject.org> - 1:6.7.17-1
+- update to 6.7.17
+
 * Mon Feb 19 2018 Tom Callaway <spot@fedoraproject.org> - 1:6.2.91-7
 - fix platform library symlink
 

@@ -1,0 +1,141 @@
+diff -up v8-6.7.17/build/toolchain/linux/BUILD.gn.notcross v8-6.7.17/build/toolchain/linux/BUILD.gn
+--- v8-6.7.17/build/toolchain/linux/BUILD.gn.notcross	2018-03-06 14:20:53.000000000 -0500
++++ v8-6.7.17/build/toolchain/linux/BUILD.gn	2018-03-06 14:37:22.505146107 -0500
+@@ -6,7 +6,6 @@ import("//build/config/sysroot.gni")
+ import("//build/toolchain/gcc_toolchain.gni")
+ 
+ clang_toolchain("clang_arm") {
+-  toolprefix = "arm-linux-gnueabihf-"
+   toolchain_args = {
+     current_cpu = "arm"
+     current_os = "linux"
+@@ -14,7 +13,6 @@ clang_toolchain("clang_arm") {
+ }
+ 
+ clang_toolchain("clang_arm64") {
+-  toolprefix = "aarch64-linux-gnu-"
+   toolchain_args = {
+     current_cpu = "arm64"
+     current_os = "linux"
+@@ -22,15 +20,13 @@ clang_toolchain("clang_arm64") {
+ }
+ 
+ gcc_toolchain("arm64") {
+-  toolprefix = "aarch64-linux-gnu-"
+-
+-  cc = "${toolprefix}gcc"
+-  cxx = "${toolprefix}g++"
++  cc = "gcc"
++  cxx = "g++"
+ 
+-  ar = "${toolprefix}ar"
++  ar = "ar"
+   ld = cxx
+-  readelf = "${toolprefix}readelf"
+-  nm = "${toolprefix}nm"
++  readelf = "readelf"
++  nm = "nm"
+ 
+   toolchain_args = {
+     current_cpu = "arm64"
+@@ -40,15 +36,13 @@ gcc_toolchain("arm64") {
+ }
+ 
+ gcc_toolchain("arm") {
+-  toolprefix = "arm-linux-gnueabihf-"
+-
+-  cc = "${toolprefix}gcc"
+-  cxx = "${toolprefix}g++"
++  cc = "gcc"
++  cxx = "g++"
+ 
+-  ar = "${toolprefix}ar"
++  ar = "ar"
+   ld = cxx
+-  readelf = "${toolprefix}readelf"
+-  nm = "${toolprefix}nm"
++  readelf = "readelf"
++  nm = "nm"
+ 
+   toolchain_args = {
+     current_cpu = "arm"
+@@ -178,14 +172,12 @@ clang_toolchain("clang_mips64el") {
+ }
+ 
+ gcc_toolchain("mipsel") {
+-  toolprefix = "mipsel-linux-gnu-"
+-
+-  cc = "${toolprefix}gcc"
+-  cxx = " ${toolprefix}g++"
+-  ar = "${toolprefix}ar"
++  cc = "gcc"
++  cxx = "g++"
++  ar = "ar"
+   ld = cxx
+-  readelf = "${toolprefix}readelf"
+-  nm = "${toolprefix}nm"
++  readelf = "readelf"
++  nm = "nm"
+ 
+   toolchain_args = {
+     cc_wrapper = ""
+@@ -197,14 +189,12 @@ gcc_toolchain("mipsel") {
+ }
+ 
+ gcc_toolchain("mips64el") {
+-  toolprefix = "mips64el-linux-gnuabi64-"
+-
+-  cc = "${toolprefix}gcc"
+-  cxx = "${toolprefix}g++"
+-  ar = "${toolprefix}ar"
++  cc = "gcc"
++  cxx = "g++"
++  ar = "ar"
+   ld = cxx
+-  readelf = "${toolprefix}readelf"
+-  nm = "${toolprefix}nm"
++  readelf = "readelf"
++  nm = "nm"
+ 
+   toolchain_args = {
+     cc_wrapper = ""
+@@ -248,14 +238,12 @@ gcc_toolchain("ppc64") {
+ }
+ 
+ gcc_toolchain("mips") {
+-  toolprefix = "mips-linux-gnu-"
+-
+-  cc = "${toolprefix}gcc"
+-  cxx = "${toolprefix}g++"
++  cc = "gcc"
++  cxx = "g++"
+ 
+-  readelf = "${toolprefix}readelf"
+-  nm = "${toolprefix}nm"
+-  ar = "${toolprefix}ar"
++  readelf = "readelf"
++  nm = "nm"
++  ar = "ar"
+   ld = cxx
+ 
+   toolchain_args = {
+@@ -266,14 +254,12 @@ gcc_toolchain("mips") {
+ }
+ 
+ gcc_toolchain("mips64") {
+-  toolprefix = "mips64-linux-gnuabi64-"
+-
+-  cc = "${toolprefix}gcc"
+-  cxx = "${toolprefix}g++"
++  cc = "gcc"
++  cxx = "g++"
+ 
+-  readelf = "${toolprefix}readelf"
+-  nm = "${toolprefix}nm"
+-  ar = "${toolprefix}ar"
++  readelf = "readelf"
++  nm = "nm"
++  ar = "ar"
+   ld = cxx
+ 
+   toolchain_args = {

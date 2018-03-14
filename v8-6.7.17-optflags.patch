@@ -1,0 +1,21 @@
+diff -up v8-6.7.17/build/config/compiler/BUILD.gn.optflags v8-6.7.17/build/config/compiler/BUILD.gn
+--- v8-6.7.17/build/config/compiler/BUILD.gn.optflags	2018-03-14 14:20:29.275684642 -0400
++++ v8-6.7.17/build/config/compiler/BUILD.gn	2018-03-14 14:22:25.056966902 -0400
+@@ -1849,7 +1849,7 @@ config("optimize_speed") {
+     # "default_optimization", below.
+     configs = [ "//build/config/nacl:irt_optimize" ]
+   } else {
+-    ldflags = common_optimize_on_ldflags
++    ldflags = [ "$OPTLDFLAGS" ] + common_optimize_on_ldflags
+     if (is_win) {
+       # Favor speed over size, /O2 must be before the common flags. The GYP
+       # build also specifies /Ot, /Oi, and /GF, but these are implied by /O2.
+@@ -1870,7 +1870,7 @@ config("optimize_speed") {
+     } else if (optimize_for_fuzzing) {
+       cflags = [ "-O1" ] + common_optimize_on_cflags
+     } else {
+-      cflags = [ "-O3" ] + common_optimize_on_cflags
++      cflags = [ "$OPTFLAGS" ] + common_optimize_on_cflags
+     }
+   }
+ }

@@ -1,0 +1,335 @@
+diff -up v8-6.7.17/build/config/compiler/BUILD.gn.fixme v8-6.7.17/build/config/compiler/BUILD.gn
+--- v8-6.7.17/build/config/compiler/BUILD.gn.fixme	2018-03-14 11:47:13.723221338 -0400
++++ v8-6.7.17/build/config/compiler/BUILD.gn	2018-03-14 11:47:13.712221590 -0400
+@@ -185,7 +185,7 @@ config("compiler") {
+   ldflags = []
+   defines = []
+   configs = []
+-  inputs = []
++  # inputs = []
+ 
+   # System-specific flags. If your compiler flags apply to one of the
+   # categories here, add it to the associated file to keep this shared config
+@@ -1278,6 +1278,9 @@ config("default_warnings") {
+       # [1] https://gcc.gnu.org/gcc-6/porting_to.html#this-cannot-be-null
+       # [2] https://crbug.com/784492#c13
+       cflags += [ "-fno-delete-null-pointer-checks" ]
++
++      # workaround tests
++      cflags += [ "-Wno-error=subobject-linkage" ]
+     }
+   }
+ 
+diff -up v8-6.7.17/src/base/file-utils.cc.fixme v8-6.7.17/src/base/file-utils.cc
+--- v8-6.7.17/src/base/file-utils.cc.fixme	2018-03-06 13:58:16.000000000 -0500
++++ v8-6.7.17/src/base/file-utils.cc	2018-03-14 11:47:12.586247445 -0400
+@@ -25,7 +25,7 @@ char* RelativePath(char** buffer, const
+         reinterpret_cast<char*>(calloc(path_separator + name_length + 2, 1));
+     *buffer[0] = '\0';
+     strncat(*buffer, exec_path, path_separator + 1);
+-    strncat(*buffer, name, name_length);
++    strncat(*buffer, name, name_length + 1);
+   } else {
+     *buffer = strdup(name);
+   }
+diff -up v8-6.7.17/src/base/macros.h.fixme v8-6.7.17/src/base/macros.h
+--- v8-6.7.17/src/base/macros.h.fixme	2018-03-06 13:58:16.000000000 -0500
++++ v8-6.7.17/src/base/macros.h	2018-03-14 11:47:12.587247422 -0400
+@@ -102,7 +102,7 @@ V8_INLINE Dest bit_cast(Source const& so
+   static_assert(sizeof(Dest) == sizeof(Source),
+                 "source and dest must be same size");
+   Dest dest;
+-  memcpy(&dest, &source, sizeof(dest));
++  memcpy(static_cast<void*>(&dest), &source, sizeof(dest));
+   return dest;
+ }
+ 
+@@ -387,10 +387,10 @@ bool is_inbounds(float_t v) {
+       static_cast<float_t>(std::numeric_limits<int_t>::min()) - 1;
+   constexpr float_t kUpperBound =
+       static_cast<float_t>(std::numeric_limits<int_t>::max()) + 1;
+-  constexpr bool kLowerBoundIsMin =
++  constexpr bool kLowerBoundIsMin __attribute__((unused)) =
+       static_cast<biggest_int_t>(kLowerBound) ==
+       static_cast<biggest_int_t>(std::numeric_limits<int_t>::min());
+-  constexpr bool kUpperBoundIsMax =
++  constexpr bool kUpperBoundIsMax __attribute__((unused)) =
+       static_cast<biggest_int_t>(kUpperBound) ==
+       static_cast<biggest_int_t>(std::numeric_limits<int_t>::max());
+   return (kLowerBoundIsMin ? (kLowerBound <= v) : (kLowerBound < v)) &&
+diff -up v8-6.7.17/src/compiler/node-cache.cc.fixme v8-6.7.17/src/compiler/node-cache.cc
+--- v8-6.7.17/src/compiler/node-cache.cc.fixme	2018-03-06 13:58:16.000000000 -0500
++++ v8-6.7.17/src/compiler/node-cache.cc	2018-03-14 11:47:12.587247422 -0400
+@@ -38,7 +38,7 @@ bool NodeCache<Key, Hash, Pred>::Resize(
+   size_ *= 4;
+   size_t num_entries = size_ + kLinearProbe;
+   entries_ = zone->NewArray<Entry>(num_entries);
+-  memset(entries_, 0, sizeof(Entry) * num_entries);
++  memset(static_cast<void*>(entries_), 0, sizeof(Entry) * num_entries);
+ 
+   // Insert the old entries into the new block.
+   for (size_t i = 0; i < old_size; ++i) {
+@@ -69,7 +69,7 @@ Node** NodeCache<Key, Hash, Pred>::Find(
+     size_t num_entries = kInitialSize + kLinearProbe;
+     entries_ = zone->NewArray<Entry>(num_entries);
+     size_ = kInitialSize;
+-    memset(entries_, 0, sizeof(Entry) * num_entries);
++    memset(static_cast<void*>(entries_), 0, sizeof(Entry) * num_entries);
+     Entry* entry = &entries_[hash & (kInitialSize - 1)];
+     entry->key_ = key;
+     return &entry->value_;
+diff -up v8-6.7.17/src/compiler/simd-scalar-lowering.cc.fixme v8-6.7.17/src/compiler/simd-scalar-lowering.cc
+--- v8-6.7.17/src/compiler/simd-scalar-lowering.cc.fixme	2018-03-06 13:58:16.000000000 -0500
++++ v8-6.7.17/src/compiler/simd-scalar-lowering.cc	2018-03-14 11:47:12.587247422 -0400
+@@ -38,7 +38,7 @@ SimdScalarLowering::SimdScalarLowering(
+   DCHECK_NOT_NULL(graph());
+   DCHECK_NOT_NULL(graph()->end());
+   replacements_ = zone()->NewArray<Replacement>(graph()->NodeCount());
+-  memset(replacements_, 0, sizeof(Replacement) * graph()->NodeCount());
++  memset(static_cast<void*>(replacements_), 0, sizeof(Replacement) * graph()->NodeCount());
+ }
+ 
+ void SimdScalarLowering::LowerGraph() {
+diff -up v8-6.7.17/src/d8.cc.fixme v8-6.7.17/src/d8.cc
+--- v8-6.7.17/src/d8.cc.fixme	2018-03-06 13:58:16.000000000 -0500
++++ v8-6.7.17/src/d8.cc	2018-03-14 11:47:12.588247399 -0400
+@@ -2691,7 +2691,10 @@ void Worker::ExecuteInThread() {
+               if (Shell::DeserializeValue(isolate, std::move(data))
+                       .ToLocal(&value)) {
+                 Local<Value> argv[] = {value};
+-                (void)onmessage_fun->Call(context, global, 1, argv);
++                MaybeLocal<Value> result = onmessage_fun->Call(context, global, 1, argv);
++		if (result.IsEmpty()) {
++			Shell::ReportException(isolate, &try_catch);
++		}
+               }
+               if (try_catch.HasCaught()) {
+                 Shell::ReportException(isolate, &try_catch);
+diff -up v8-6.7.17/src/flags.cc.fixme v8-6.7.17/src/flags.cc
+--- v8-6.7.17/src/flags.cc.fixme	2018-03-06 13:58:16.000000000 -0500
++++ v8-6.7.17/src/flags.cc	2018-03-14 11:47:12.588247399 -0400
+@@ -557,6 +557,7 @@ static char* SkipBlackSpace(char* p) {
+ // static
+ int FlagList::SetFlagsFromString(const char* str, int len) {
+   // make a 0-terminated copy of str
++  assert(len > 0);
+   ScopedVector<char> copy0(len + 1);
+   MemCopy(copy0.start(), str, len);
+   copy0[len] = '\0';
+diff -up v8-6.7.17/src/frames.h.fixme v8-6.7.17/src/frames.h
+--- v8-6.7.17/src/frames.h.fixme	2018-03-06 13:58:16.000000000 -0500
++++ v8-6.7.17/src/frames.h	2018-03-14 11:47:12.589247376 -0400
+@@ -44,7 +44,7 @@ class InnerPointerToCodeCache {
+   }
+ 
+   void Flush() {
+-    memset(&cache_[0], 0, sizeof(cache_));
++    memset(static_cast<void*>(&cache_[0]), 0, sizeof(cache_));
+   }
+ 
+   InnerPointerToCodeCacheEntry* GetCacheEntry(Address inner_pointer);
+diff -up v8-6.7.17/src/libplatform/tracing/trace-object.cc.fixme v8-6.7.17/src/libplatform/tracing/trace-object.cc
+--- v8-6.7.17/src/libplatform/tracing/trace-object.cc.fixme	2018-03-06 13:58:16.000000000 -0500
++++ v8-6.7.17/src/libplatform/tracing/trace-object.cc	2018-03-14 11:47:12.589247376 -0400
+@@ -25,7 +25,7 @@ V8_INLINE static void CopyTraceObjectPar
+                                                const char** member) {
+   if (*member) {
+     size_t length = strlen(*member) + 1;
+-    strncpy(*buffer, *member, length);
++    memcpy(*buffer, *member, length);
+     *member = *buffer;
+     *buffer += length;
+   }
+diff -up v8-6.7.17/src/log.cc.fixme v8-6.7.17/src/log.cc
+--- v8-6.7.17/src/log.cc.fixme	2018-03-06 13:58:16.000000000 -0500
++++ v8-6.7.17/src/log.cc	2018-03-14 11:47:12.590247353 -0400
+@@ -531,7 +531,7 @@ void JitLogger::LogRecordedBuffer(Abstra
+                                   SharedFunctionInfo* shared, const char* name,
+                                   int length) {
+   JitCodeEvent event;
+-  memset(&event, 0, sizeof(event));
++  memset(static_cast<void*>(&event), 0, sizeof(event));
+   event.type = JitCodeEvent::CODE_ADDED;
+   event.code_start = code->instruction_start();
+   event.code_len = code->instruction_size();
+@@ -548,7 +548,7 @@ void JitLogger::LogRecordedBuffer(Abstra
+ void JitLogger::LogRecordedBuffer(const InstructionStream* stream,
+                                   const char* name, int length) {
+   JitCodeEvent event;
+-  memset(&event, 0, sizeof(event));
++  memset(static_cast<void*>(&event), 0, sizeof(event));
+   event.type = JitCodeEvent::CODE_ADDED;
+   event.code_start = stream->bytes();
+   event.code_len = stream->byte_length();
+@@ -562,7 +562,7 @@ void JitLogger::LogRecordedBuffer(const
+ void JitLogger::LogRecordedBuffer(wasm::WasmCode* code, const char* name,
+                                   int length) {
+   JitCodeEvent event;
+-  memset(&event, 0, sizeof(event));
++  memset(static_cast<void*>(&event), 0, sizeof(event));
+   event.type = JitCodeEvent::CODE_ADDED;
+   event.code_start = code->instructions().start();
+   event.code_len = code->instructions().length();
+@@ -594,7 +594,7 @@ void JitLogger::AddCodeLinePosInfoEvent(
+     int position,
+     JitCodeEvent::PositionType position_type) {
+   JitCodeEvent event;
+-  memset(&event, 0, sizeof(event));
++  memset(static_cast<void*>(&event), 0, sizeof(event));
+   event.type = JitCodeEvent::CODE_ADD_LINE_POS_INFO;
+   event.user_data = jit_handler_data;
+   event.line_info.offset = pc_offset;
+@@ -607,7 +607,7 @@ void JitLogger::AddCodeLinePosInfoEvent(
+ 
+ void* JitLogger::StartCodePosInfoEvent() {
+   JitCodeEvent event;
+-  memset(&event, 0, sizeof(event));
++  memset(static_cast<void*>(&event), 0, sizeof(event));
+   event.type = JitCodeEvent::CODE_START_LINE_INFO_RECORDING;
+ 
+   code_event_handler_(&event);
+@@ -617,7 +617,7 @@ void* JitLogger::StartCodePosInfoEvent()
+ void JitLogger::EndCodePosInfoEvent(Address start_address,
+                                     void* jit_handler_data) {
+   JitCodeEvent event;
+-  memset(&event, 0, sizeof(event));
++  memset(static_cast<void*>(&event), 0, sizeof(event));
+   event.type = JitCodeEvent::CODE_END_LINE_INFO_RECORDING;
+   event.code_start = start_address;
+   event.user_data = jit_handler_data;
+diff -up v8-6.7.17/src/parsing/parser-base.h.fixme v8-6.7.17/src/parsing/parser-base.h
+--- v8-6.7.17/src/parsing/parser-base.h.fixme	2018-03-06 13:58:16.000000000 -0500
++++ v8-6.7.17/src/parsing/parser-base.h	2018-03-14 11:47:12.591247330 -0400
+@@ -2163,7 +2163,8 @@ template <class Impl>
+ typename ParserBase<Impl>::ExpressionT ParserBase<Impl>::ParsePropertyName(
+     IdentifierT* name, PropertyKind* kind, bool* is_generator, bool* is_get,
+     bool* is_set, bool* is_async, bool* is_computed_name, bool* ok) {
+-  DCHECK_EQ(*kind, PropertyKind::kNotSet);
++  PropertyKind kindns = PropertyKind::kNotSet;
++  DCHECK_EQ(*kind, kindns);
+   DCHECK(!*is_generator);
+   DCHECK(!*is_get);
+   DCHECK(!*is_set);
+diff -up v8-6.7.17/src/wasm/wasm-module-builder.h.fixme v8-6.7.17/src/wasm/wasm-module-builder.h
+diff -up v8-6.7.17/src/zone/zone-segment.cc.fixme v8-6.7.17/src/zone/zone-segment.cc
+--- v8-6.7.17/src/zone/zone-segment.cc.fixme	2018-03-06 13:58:16.000000000 -0500
++++ v8-6.7.17/src/zone/zone-segment.cc	2018-03-14 11:47:12.591247330 -0400
+@@ -15,7 +15,7 @@ void Segment::ZapContents() {
+ 
+ void Segment::ZapHeader() {
+ #ifdef DEBUG
+-  memset(this, kZapDeadByte, sizeof(Segment));
++  memset(static_cast<void*>(this), kZapDeadByte, sizeof(Segment));
+ #endif
+ }
+ 
+diff -up v8-6.7.17/test/cctest/compiler/graph-builder-tester.h.fixme v8-6.7.17/test/cctest/compiler/graph-builder-tester.h
+--- v8-6.7.17/test/cctest/compiler/graph-builder-tester.h.fixme	2018-03-06 13:58:16.000000000 -0500
++++ v8-6.7.17/test/cctest/compiler/graph-builder-tester.h	2018-03-14 11:47:12.591247330 -0400
+@@ -164,9 +164,6 @@ class GraphBuilderTester : public Handle
+   Node* ChangeUint32ToTagged(Node* a) {
+     return NewNode(simplified()->ChangeUint32ToTagged(), a);
+   }
+-  Node* ChangeFloat64ToTagged(Node* a) {
+-    return NewNode(simplified()->ChangeFloat64ToTagged(), a);
+-  }
+   Node* ChangeTaggedToBit(Node* a) {
+     return NewNode(simplified()->ChangeTaggedToBit(), a);
+   }
+diff -up v8-6.7.17/test/cctest/interpreter/bytecode-expectations-printer.cc.fixme v8-6.7.17/test/cctest/interpreter/bytecode-expectations-printer.cc
+--- v8-6.7.17/test/cctest/interpreter/bytecode-expectations-printer.cc.fixme	2018-03-06 13:58:16.000000000 -0500
++++ v8-6.7.17/test/cctest/interpreter/bytecode-expectations-printer.cc	2018-03-14 11:47:12.591247330 -0400
+@@ -81,7 +81,8 @@ v8::Local<v8::Module> BytecodeExpectatio
+ }
+ 
+ void BytecodeExpectationsPrinter::Run(v8::Local<v8::Script> script) const {
+-  (void)script->Run(isolate_->GetCurrentContext());
++  Local<Value> result = script->Run(isolate_->GetCurrentContext()).ToLocalChecked();
++  CHECK(!result.IsEmpty());
+ }
+ 
+ i::Handle<v8::internal::BytecodeArray>
+diff -up v8-6.7.17/test/cctest/parsing/test-scanner-streams.cc.fixme v8-6.7.17/test/cctest/parsing/test-scanner-streams.cc
+--- v8-6.7.17/test/cctest/parsing/test-scanner-streams.cc.fixme	2018-03-06 13:58:16.000000000 -0500
++++ v8-6.7.17/test/cctest/parsing/test-scanner-streams.cc	2018-03-14 11:47:12.592247307 -0400
+@@ -194,7 +194,7 @@ TEST(Utf8ChunkBoundaries) {
+   for (size_t i = 1; i < len; i++) {
+     // Copy source string into buffer, splitting it at i.
+     // Then add three chunks, 0..i-1, i..strlen-1, empty.
+-    strncpy(buffer, unicode_utf8, i);
++    memcpy(buffer, unicode_utf8, i);
+     strncpy(buffer + i + 1, unicode_utf8 + i, len - i);
+     buffer[i] = '\0';
+     buffer[len + 1] = '\0';
+@@ -220,8 +220,8 @@ TEST(Utf8SingleByteChunks) {
+   char buffer[arraysize(unicode_utf8) + 4];
+   for (size_t i = 1; i < len - 1; i++) {
+     // Copy source string into buffer, make a single-byte chunk at i.
+-    strncpy(buffer, unicode_utf8, i);
+-    strncpy(buffer + i + 3, unicode_utf8 + i + 1, len - i - 1);
++    memcpy(buffer, unicode_utf8, i);
++    memcpy(buffer + i + 3, unicode_utf8 + i + 1, len - i - 1);
+     buffer[i] = '\0';
+     buffer[i + 1] = unicode_utf8[i];
+     buffer[i + 2] = '\0';
+diff -up v8-6.7.17/testing/gtest/include/gtest/internal/gtest-param-util.h.fixme v8-6.7.17/testing/gtest/include/gtest/internal/gtest-param-util.h
+--- v8-6.7.17/testing/gtest/include/gtest/internal/gtest-param-util.h.fixme	2018-03-14 12:49:02.620027123 -0400
++++ v8-6.7.17/testing/gtest/include/gtest/internal/gtest-param-util.h	2018-03-14 12:51:50.095577470 -0400
+@@ -34,6 +34,8 @@
+ #ifndef GTEST_INCLUDE_GTEST_INTERNAL_GTEST_PARAM_UTIL_H_
+ #define GTEST_INCLUDE_GTEST_INTERNAL_GTEST_PARAM_UTIL_H_
+ 
++#pragma GCC diagnostic warning "-Wsubobject-linkage"
++
+ #include <ctype.h>
+ 
+ #include <iterator>
+diff -up v8-6.7.17/test/unittests/base/functional-unittest.cc.fixme v8-6.7.17/test/unittests/base/functional-unittest.cc
+--- v8-6.7.17/test/unittests/base/functional-unittest.cc.fixme	2018-03-06 13:58:17.000000000 -0500
++++ v8-6.7.17/test/unittests/base/functional-unittest.cc	2018-03-14 11:47:12.592247307 -0400
+@@ -74,7 +74,9 @@ TYPED_TEST(FunctionalTest, EqualToImplie
+   this->rng()->NextBytes(values, sizeof(values));
+   TRACED_FOREACH(TypeParam, v1, values) {
+     TRACED_FOREACH(TypeParam, v2, values) {
+-      if (e(v1, v2)) EXPECT_EQ(h(v1), h(v2));
++      if (e(v1, v2)) { 
++        EXPECT_EQ(h(v1), h(v2));
++      }
+     }
+   }
+ }
+@@ -143,7 +145,9 @@ TYPED_TEST(FunctionalTest, BitEqualToImp
+   this->rng()->NextBytes(&values, sizeof(values));
+   TRACED_FOREACH(TypeParam, v1, values) {
+     TRACED_FOREACH(TypeParam, v2, values) {
+-      if (e(v1, v2)) EXPECT_EQ(h(v1), h(v2));
++      if (e(v1, v2)) { 
++        EXPECT_EQ(h(v1), h(v2));
++      }
+     }
+   }
+ }
+diff -up v8-6.7.17/test/unittests/detachable-vector-unittest.cc.fixme v8-6.7.17/test/unittests/detachable-vector-unittest.cc
+--- v8-6.7.17/test/unittests/detachable-vector-unittest.cc.fixme	2018-03-06 13:58:17.000000000 -0500
++++ v8-6.7.17/test/unittests/detachable-vector-unittest.cc	2018-03-14 11:47:12.592247307 -0400
+@@ -52,7 +52,7 @@ TEST(DetachableVector, DetachLeaksBackin
+   // Force allocation of the backing store.
+   v.push_back(1);
+   // Bit-copy the data structure.
+-  memcpy(&v2, &v, sizeof(DetachableVector<int>));
++  memcpy(static_cast<void*>(&v2), &v, sizeof(DetachableVector<int>));
+   // The backing store should be leaked here - free was not called.
+   v.detach();
+ 
+diff -up v8-6.7.17/test/unittests/wasm/wasm-module-builder-unittest.cc.fixme v8-6.7.17/test/unittests/wasm/wasm-module-builder-unittest.cc
+--- v8-6.7.17/test/unittests/wasm/wasm-module-builder-unittest.cc.fixme	2018-03-14 12:44:18.816950209 -0400
++++ v8-6.7.17/test/unittests/wasm/wasm-module-builder-unittest.cc	2018-03-14 12:44:26.911778869 -0400
+@@ -28,7 +28,7 @@ TEST_F(WasmModuleBuilderTest, Regression
+   // Test crashed with asan.
+   ZoneBuffer buffer(zone());
+   const size_t kSize = ZoneBuffer::kInitialSize * 3 + 4096 + 100;
+-  byte data[kSize];
++  byte data[kSize] = {};
+   buffer.write(data, kSize);
+ }
+ 
