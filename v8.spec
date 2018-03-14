@@ -304,8 +304,12 @@ chmod -R -x %{buildroot}%{python_sitelib}/*.py*
 %{python_sitelib}/j*.py*
 
 %changelog
-* Tue Mar  6 2018 Tom Callaway <spot@fedoraproject.org> - 1:6.7.17-1
+* Wed Mar 14 2018 Tom Callaway <spot@fedoraproject.org> - 1:6.7.17-1
 - update to 6.7.17
+
+* Wed Mar 07 2018 Adam Williamson <awilliam@redhat.com> - 1:6.2.91-8
+- Rebuild to fix GCC 8 mis-compilation
+  See https://da.gd/YJVwk ("GCC 8 ABI change on x86_64")
 
 * Mon Feb 19 2018 Tom Callaway <spot@fedoraproject.org> - 1:6.2.91-7
 - fix platform library symlink
