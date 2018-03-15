@@ -1,0 +1,12 @@
+diff -up v8-6.7.17/build/config/compiler/BUILD.gn.memexhaust v8-6.7.17/build/config/compiler/BUILD.gn
+--- v8-6.7.17/build/config/compiler/BUILD.gn.memexhaust	2018-03-15 10:19:59.313283572 -0400
++++ v8-6.7.17/build/config/compiler/BUILD.gn	2018-03-15 10:20:09.750008452 -0400
+@@ -2010,7 +2010,7 @@ config("symbols") {
+         # [1] crrev.com/a81d5ade0b043208e06ad71a38bcf9c348a1a52f
+         cflags += [ "-gdwarf-3" ]
+       }
+-      cflags += [ "-g2" ]
++      cflags += [ "-g1" ]
+     }
+     if (use_debug_fission && !is_nacl) {
+       cflags += [ "-gsplit-dwarf" ]

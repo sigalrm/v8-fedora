@@ -65,7 +65,7 @@ Patch6:		v8-6.2.91-sover.patch
 # silly google
 Patch8:		v8-6.7.17-notcross.patch
 # On i686 and armv7hl, use -g1 to avoid mem exhaust
-Patch9:		v8-6.2.91-i686-g1-to-avoid-mem-exhaust.patch
+Patch9:		v8-6.7.17-i686-g1-to-avoid-mem-exhaust.patch
 # Fedora 25 and older need less flags
 # and clang is not tolerant of flags it doesn't know about
 Patch10:	v8-6.2.91-oldclang-flags.patch
