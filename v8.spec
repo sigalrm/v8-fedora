@@ -25,7 +25,7 @@
 
 Name:		v8
 Version:	%{somajor}.%{sominor}.%{sobuild}
-Release:	1%{?dist}
+Release:	2%{?dist}
 Epoch:		1
 Summary:	JavaScript Engine
 Group:		System Environment/Libraries
@@ -304,6 +304,9 @@ chmod -R -x %{buildroot}%{python_sitelib}/*.py*
 %{python_sitelib}/j*.py*
 
 %changelog
+* Mon Apr 30 2018 Pete Walter <pwalter@fedoraproject.org> - 1:6.7.17-2
+- Rebuild for ICU 61.1
+
 * Wed Mar 14 2018 Tom Callaway <spot@fedoraproject.org> - 1:6.7.17-1
 - update to 6.7.17
 
