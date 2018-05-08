@@ -25,7 +25,7 @@
 
 Name:		v8
 Version:	%{somajor}.%{sominor}.%{sobuild}
-Release:	2%{?dist}
+Release:	3%{?dist}
 Epoch:		1
 Summary:	JavaScript Engine
 Group:		System Environment/Libraries
@@ -75,6 +75,10 @@ Patch11:	v8-6.2.91-gcc8-gn-fabi11.patch
 Patch12:	v8-6.7.17-fixme.patch
 # Use Fedora optflags
 Patch13:	v8-6.7.17-optflags.patch
+# Reconcile libc++abi with unwind.h from gcc
+# https://bugs.llvm.org/show_bug.cgi?id=35945
+# Modified patch from https://reviews.llvm.org/D42242
+Patch14:        v8-6.7.17-fix-gcc-unwind-header.patch
 
 # PPC64 doesn't like libcxx code.
 # error: '(9.223372036854775807e+18 / 1.0e+9)' is not a constant expression
@@ -137,6 +141,7 @@ popd
 %patch11 -p1 -b .fabi11
 %patch12 -p1 -b .fixme
 %patch13 -p1 -b .optflags
+%patch14 -p1 -b .unwind
 
 SPLITOPTFLAGS=""
 for i in `echo %{optflags} | sed 's/ /\n/g'`; do
@@ -304,6 +309,9 @@ chmod -R -x %{buildroot}%{python_sitelib}/*.py*
 %{python_sitelib}/j*.py*
 
 %changelog
+* Tue May 8 2018 Sergey Avseyev <sergey.avseyev@gmail.com> - 1:6.7.17-3
+- Fix ARM build. Integrate fix for https://bugs.llvm.org/show_bug.cgi?id=35945
+
 * Mon Apr 30 2018 Pete Walter <pwalter@fedoraproject.org> - 1:6.7.17-2
 - Rebuild for ICU 61.1
 
