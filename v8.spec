@@ -25,7 +25,7 @@
 
 Name:		v8
 Version:	%{somajor}.%{sominor}.%{sobuild}
-Release:	3%{?dist}
+Release:	4%{?dist}
 Epoch:		1
 Summary:	JavaScript Engine
 Group:		System Environment/Libraries
@@ -274,6 +274,7 @@ install -p src/extensions/*.h %{buildroot}%{_includedir}/v8/extensions/
 pushd %{buildroot}%{_libdir}
 ln -sf libv8.so.%{somajor} libv8.so
 ln -sf libv8_libplatform.so.%{somajor} libv8_libplatform.so
+ln -sf libv8_libbase.so.%{somajor} libv8_libbase.so
 popd
 
 # install Python JS minifier scripts for nodejs
@@ -309,6 +310,9 @@ chmod -R -x %{buildroot}%{python_sitelib}/*.py*
 %{python_sitelib}/j*.py*
 
 %changelog
+* Tue May 15 2018 Sergey Avseyev <sergey.avseyev@gmail.com> - 1:6.7.17-4
+- Add libv8_libbase.so symlink to devel package.
+
 * Tue May 8 2018 Sergey Avseyev <sergey.avseyev@gmail.com> - 1:6.7.17-3
 - Fix ARM build. Integrate fix for https://bugs.llvm.org/show_bug.cgi?id=35945
 
