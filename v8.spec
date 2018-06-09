@@ -258,17 +258,17 @@ install -p -m0755 mksnapshot %{buildroot}%{_bindir}
 # install -p -m0755 parser_fuzzer %{buildroot}%{_bindir}
 %if 0
 # BLOBS! (Don't stress. They get built out of source code.)
-install -p natives_blob.bin snapshot_blob.bin %{buildroot}%{_libdir}
+install -p -m0644 natives_blob.bin snapshot_blob.bin %{buildroot}%{_libdir}
 %endif
 popd
 
 # Now, headers
 mkdir -p %{buildroot}%{_includedir}
-install -p include/*.h %{buildroot}%{_includedir}
+install -p -m0644 include/*.h %{buildroot}%{_includedir}
 cp -a include/libplatform %{buildroot}%{_includedir}
 # Are these still useful?
 mkdir -p %{buildroot}%{_includedir}/v8/extensions/
-install -p src/extensions/*.h %{buildroot}%{_includedir}/v8/extensions/
+install -p -m0644 src/extensions/*.h %{buildroot}%{_includedir}/v8/extensions/
 
 # Make shared library links
 pushd %{buildroot}%{_libdir}
